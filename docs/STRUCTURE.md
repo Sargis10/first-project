@@ -19,6 +19,7 @@ This project now uses feature directories as the main structure.
   - `book-details.php`
   - `stats.php`
   - `about.php`
+  - `contact.php`
 - `includes/` (shared bootstrap and layout)
 - `assets/css/pages/` (page-level CSS)
 - `assets/js/pages/` (page-level JS)

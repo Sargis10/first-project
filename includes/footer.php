@@ -14,6 +14,7 @@ $footerAdmin = $footerLoggedIn && function_exists('isAdmin') && isAdmin();
                 <ul class="site-footer__links">
                     <li><a href="/index.php"><?= htmlspecialchars(t('footer.link_catalog')) ?></a></li>
                     <li><a href="/library/about.php"><?= htmlspecialchars(t('footer.link_about')) ?></a></li>
+                    <li><a href="/library/contact.php"><?= htmlspecialchars(t('footer.link_contact')) ?></a></li>
                 </ul>
             </div>
             <div class="site-footer__col">

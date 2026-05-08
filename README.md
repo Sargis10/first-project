@@ -53,6 +53,7 @@ Booking center(SSK)/
     book-details.php
     stats.php
     about.php
+    contact.php
     index.php
   assets/
     css/pages/
@@ -106,6 +107,7 @@ Booking center(SSK)/
 - `library/book-form.php`: add/edit book form for admin.
 - `library/stats.php`: reading insight cards + genre distribution.
 - `library/about.php`: content page driven by DB settings.
+- `library/contact.php`: multilingual contact page (hero, channels, checklist, shortcuts); inbox from `CONTACT_EMAIL` env or placeholder.
 
 ### Admin (`admin/`)
 - `admin/dashboard.php`: high-level metrics, charts, recent books/users.
@@ -259,6 +261,10 @@ Runtime DB configuration comes from environment variables (`.env` for local dev)
 
 ### Recommendation
 Keep `.env` out of git and rotate DB credentials regularly.
+
+Optional public inbox for the Contact page:
+
+- `CONTACT_EMAIL` — shown on `/library/contact.php` and used in the `mailto:` link (defaults to `support@libris.local` if unset).
 
 ---
 
