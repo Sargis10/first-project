@@ -81,7 +81,7 @@ foreach ($rows as $book) {
                     </div>
                     <div class="card-content">
                         <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-color); margin-bottom: 4px;">
-                            ' . htmlspecialchars($book['category_name'] ?? 'Uncategorized') . '
+                            ' . htmlspecialchars($book['category_name'] ?? t('books.uncategorized')) . '
                         </div>
                         <h3 class="card-title">' . htmlspecialchars($book['title'] ?? '') . '</h3>
                         <p class="card-subtitle">' . htmlspecialchars($book['author'] ?? '') . '</p>

@@ -50,6 +50,7 @@ This file is the persistent working memory for this project and should be update
 - Visual identity: global classic-library background art with readable overlay tuning in `CSS/style.css`.
 - Performance: catalog now loads in batches (`20` per request) via `library/load-books.php` + infinite load behavior in `assets/js/pages/index.js`.
 - Filtering fix: category/search filters now query server-side with pagination so each genre returns correct results.
+- Added multilingual foundation (Armenian, English, Russian, French): centralized i18n helper, language packs in `lang/`, language switcher in header, and translated core pages (`index`, `auth/*`, `about`, common nav/footer).
 
 ## User process requirements
 - Keep deploying changes to server after important updates.

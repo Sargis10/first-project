@@ -1,6 +1,6 @@
     <footer>
         <div class="container">
-            <p>&copy; <?= date('Y') ?> Libris. All rights reserved.</p>
+            <p>&copy; <?= date('Y') ?> Libris. <?= htmlspecialchars(t('footer.rights')) ?></p>
         </div>
     </footer>
     <?php if (isset($pageScripts) && is_array($pageScripts)): ?>

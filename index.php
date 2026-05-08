@@ -31,19 +31,19 @@ $pageScripts = ['assets/js/pages/index.js'];
 <main class="container">
     <div class="page-header">
         <div class="page-title">
-            <h1>My Library</h1>
-            <p>Explore the full library catalog.</p>
+            <h1><?= htmlspecialchars(t('index.title')) ?></h1>
+            <p><?= htmlspecialchars(t('index.subtitle')) ?></p>
         </div>
         
         <div class="search-container">
             <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="searchInput" placeholder="Search books...">
+            <input type="text" id="searchInput" placeholder="<?= htmlspecialchars(t('index.search_placeholder')) ?>">
         </div>
     </div>
 
     <!-- CATEGORY FILTERS -->
     <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px;" id="categoryFilters">
-        <button class="btn btn-primary cat-filter" data-category="all" style="border-radius: 99px;">All Books</button>
+        <button class="btn btn-primary cat-filter" data-category="all" style="border-radius: 99px;"><?= htmlspecialchars(t('index.all_books')) ?></button>
         <?php foreach($categories as $cat): ?>
             <button class="btn btn-outline cat-filter" data-category="<?= htmlspecialchars(strtolower($cat['name'])) ?>" style="border-radius: 99px; font-size: 13px;">
                 <?= htmlspecialchars($cat['name']) ?>
@@ -74,7 +74,7 @@ $pageScripts = ['assets/js/pages/index.js'];
                             </div>
                             <div class="card-content">
                                 <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-color); margin-bottom: 4px;">
-                                    <?= htmlspecialchars($book['category_name'] ?? 'Uncategorized') ?>
+                                    <?= htmlspecialchars($book['category_name'] ?? t('books.uncategorized')) ?>
                                 </div>
                                 <h3 class="card-title"><?= htmlspecialchars($book['title']) ?></h3>
                                 <p class="card-subtitle"><?= htmlspecialchars($book['author']) ?></p>
@@ -85,7 +85,7 @@ $pageScripts = ['assets/js/pages/index.js'];
             <?php endforeach; ?>
         </div>
         <div id="dynamicNoResults" style="display:none; text-align:center; padding:64px 0; color:var(--muted-color);">
-            No books found for this filter.
+            <?= htmlspecialchars(t('index.no_results_filter')) ?>
         </div>
     <?php else: ?>
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 0; text-align: center; gap: 16px;">
@@ -93,8 +93,8 @@ $pageScripts = ['assets/js/pages/index.js'];
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
             </div>
             <div>
-                <h2 style="font-size: 24px; margin-bottom: 4px;">No books found</h2>
-                <p style="color: var(--muted-color);">Start your collection by adding your first book.</p>
+                <h2 style="font-size: 24px; margin-bottom: 4px;"><?= htmlspecialchars(t('index.no_books_title')) ?></h2>
+                <p style="color: var(--muted-color);"><?= htmlspecialchars(t('index.no_books_subtitle')) ?></p>
             </div>
             <?php if (isAdmin()): ?>
             <form method="POST" action="/library/book-form.php" style="margin-top: 16px; display: inline-block;">
@@ -102,7 +102,7 @@ $pageScripts = ['assets/js/pages/index.js'];
                 <input type="hidden" name="action" value="prepare_create">
                 <button type="submit" class="btn btn-primary" style="margin: 0;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    Add First Book
+                    <?= htmlspecialchars(t('index.add_first_book')) ?>
                 </button>
             </form>
             <?php endif; ?>
@@ -112,7 +112,7 @@ $pageScripts = ['assets/js/pages/index.js'];
     <?php if (count($books) > 0): ?>
         <div style="display: flex; justify-content: center; margin: 40px 0 12px;">
             <button id="loadMoreBtn" type="button" class="btn btn-outline" style="padding: 12px 18px;">
-                Load more
+                <?= htmlspecialchars(t('index.load_more')) ?>
             </button>
         </div>
         <div id="loadMoreSentinel" style="height: 1px;"></div>
