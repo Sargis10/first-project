@@ -1,0 +1,81 @@
+<?php
+require_once __DIR__ . '/../includes/db.php';
+
+header('Content-Type: application/json; charset=utf-8');
+
+if (!isLoggedIn()) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Unauthorized']);
+    exit;
+}
+
+$limit = (int)($_GET['limit'] ?? 20);
+$offset = (int)($_GET['offset'] ?? 0);
+
+// Hard clamp to keep the page fast and predictable.
+$limit = max(1, min($limit, 20));
+$offset = max(0, $offset);
+
+$fetchLimit = $limit + 1; // one extra to detect "has more"
+
+$stmt = $pdo->prepare("
+    SELECT books.*, categories.name as category_name
+    FROM books
+    LEFT JOIN categories ON books.category_id = categories.id
+    ORDER BY created_at DESC
+    LIMIT :limit OFFSET :offset
+");
+$stmt->bindValue(':limit', $fetchLimit, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$hasMore = count($rows) > $limit;
+$rows = array_slice($rows, 0, $limit);
+
+$html = '';
+foreach ($rows as $book) {
+    $bookId = (int)$book['id'];
+    $title = strtolower((string)($book['title'] ?? ''));
+    $author = strtolower((string)($book['author'] ?? ''));
+    $category = strtolower((string)($book['category_name'] ?? 'uncategorized'));
+
+    $html .= '
+        <div class="card-item" 
+             data-title="' . htmlspecialchars($title) . '" 
+             data-author="' . htmlspecialchars($author) . '" 
+             data-category="' . htmlspecialchars($category) . '">
+            <form method="POST" action="/library/book-details.php" style="margin: 0;">
+                <input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrfToken()) . '">
+                <input type="hidden" name="action" value="open_book">
+                <input type="hidden" name="book_id" value="' . $bookId . '">
+                <button type="submit" class="card-link">
+                    <div class="card-image-wrap">
+                        ' . (
+                            !empty($book['cover_url'])
+                                ? '<img src="' . htmlspecialchars($book['cover_url']) . '"
+                                     alt="Cover"
+                                     onerror="this.onerror=null; this.src=\'https://placehold.co/400x600/1a1a1a/ffffff?text=' . urlencode((string)$book['title']) . '\';">'
+                                : '<svg class="placeholder-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>'
+                        ) . '
+                    </div>
+                    <div class="card-content">
+                        <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-color); margin-bottom: 4px;">
+                            ' . htmlspecialchars($book['category_name'] ?? 'Uncategorized') . '
+                        </div>
+                        <h3 class="card-title">' . htmlspecialchars($book['title'] ?? '') . '</h3>
+                        <p class="card-subtitle">' . htmlspecialchars($book['author'] ?? '') . '</p>
+                    </div>
+                </button>
+            </form>
+        </div>';
+}
+
+echo json_encode([
+    'html' => $html,
+    'has_more' => $hasMore,
+    'next_offset' => $offset + count($rows),
+]);
+exit;
+

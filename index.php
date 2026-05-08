@@ -7,12 +7,19 @@ if (!isLoggedIn()) {
 }
 
 $user_id = currentUserId();
-$stmt = $pdo->query("
+$limit = 20;
+$offset = 0;
+
+$stmt = $pdo->prepare("
     SELECT books.*, categories.name as category_name 
     FROM books 
     LEFT JOIN categories ON books.category_id = categories.id 
     ORDER BY created_at DESC
+    LIMIT :limit OFFSET :offset
 ");
+$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
 $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
@@ -45,7 +52,7 @@ $pageScripts = ['assets/js/pages/index.js'];
     </div>
 
     <?php if (count($books) > 0): ?>
-        <div class="grid" id="booksGrid">
+        <div class="grid" id="booksGrid" data-offset="<?= (int)$offset ?>" data-limit="<?= (int)$limit ?>">
             <?php foreach ($books as $book): ?>
                 <div class="card-item" 
                      data-title="<?= htmlspecialchars(strtolower($book['title'])) ?>" 
@@ -97,6 +104,15 @@ $pageScripts = ['assets/js/pages/index.js'];
             </form>
             <?php endif; ?>
         </div>
+    <?php endif; ?>
+
+    <?php if (count($books) > 0): ?>
+        <div style="display: flex; justify-content: center; margin: 40px 0 12px;">
+            <button id="loadMoreBtn" type="button" class="btn btn-outline" style="padding: 12px 18px;">
+                Load more
+            </button>
+        </div>
+        <div id="loadMoreSentinel" style="height: 1px;"></div>
     <?php endif; ?>
 </main>
 
