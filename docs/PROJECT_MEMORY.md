@@ -44,5 +44,17 @@ This file is the persistent working memory for this project and should be update
 - Apache or built-in PHP server
 - MySQL/MariaDB server
 
+## Latest updates (2026-05-09)
+- Security hardening: env-based DB credentials, CSRF protection on state-changing forms, stricter session cookie settings, and safer error output.
+- UI upgrade: redesigned `library/about.php` with rich default content and custom `assets/css/pages/about.css`.
+- Visual identity: global classic-library background art with readable overlay tuning in `CSS/style.css`.
+- Performance: catalog now loads in batches (`20` per request) via `library/load-books.php` + infinite load behavior in `assets/js/pages/index.js`.
+- Filtering fix: category/search filters now query server-side with pagination so each genre returns correct results.
+
+## User process requirements
+- Keep deploying changes to server after important updates.
+- Keep pushing project updates to GitHub remotes.
+- Maintain this memory file with major user requests and delivered changes.
+
 ## Next planned step
-- Continue layout cleanup by moving remaining inline style attributes from PHP templates to page CSS files, then publish to GitHub.
+- Mirror current project state to additional repository `https://github.com/Sargis10/first-project.git` and continue syncing future updates there.
