@@ -88,10 +88,14 @@ $pageScripts = ['assets/js/pages/user-dashboard.js'];
             <h1 style="font-size: 42px; font-family: var(--font-serif); margin-bottom: 8px;">My Library</h1>
             <p style="color: var(--muted-color); font-size: 18px;">Your personal universe of curated stories.</p>
         </div>
-        <a href="/library/book-form.php" class="btn btn-primary" style="padding: 14px 28px; border-radius: 12px; box-shadow: 0 10px 20px -5px rgba(90, 90, 64, 0.3);">
-            <svg style="margin-right: 8px;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Add New Book
-        </a>
+        <form method="POST" action="/library/book-form.php" style="margin: 0;">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
+            <input type="hidden" name="action" value="prepare_create">
+            <button type="submit" class="btn btn-primary" style="padding: 14px 28px; border-radius: 12px; box-shadow: 0 10px 20px -5px rgba(90, 90, 64, 0.3);">
+                <svg style="margin-right: 8px;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add New Book
+            </button>
+        </form>
     </header>
 
     <div class="library-tabs" id="libraryTabs">
@@ -144,7 +148,11 @@ function renderBookGrid($books, $emptyMsg) {
         foreach ($books as $b) {
             echo '
             <div class="book-card" style="position: relative;">
-                <a href="/library/book-details.php?id=' . $b['id'] . '" style="text-decoration: none; color: inherit;">
+                <form method="POST" action="/library/book-details.php" style="margin: 0;">
+                    <input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrfToken()) . '">
+                    <input type="hidden" name="action" value="open_book">
+                    <input type="hidden" name="book_id" value="' . (int)$b['id'] . '">
+                    <button type="submit" style="all: unset; cursor: pointer; display: block; width: 100%; text-align: left; color: inherit;">
                     <div style="aspect-ratio: 2/3; border-radius: 16px; overflow: hidden; background: #f1f5f9; box-shadow: 0 15px 35px -12px rgba(0,0,0,0.15); transition: transform 0.3s; margin-bottom: 20px;">
                         <img src="' . htmlspecialchars($b['cover_url'] ?: '') . '" 
                              style="width: 100%; height: 100%; object-fit: cover;" 
@@ -155,7 +163,8 @@ function renderBookGrid($books, $emptyMsg) {
                         <h4 style="font-size: 17px; font-weight: 700; margin-bottom: 4px; line-height: 1.3;">' . htmlspecialchars($b['title']) . '</h4>
                         <p style="font-size: 14px; color: var(--muted-color);">' . htmlspecialchars($b['author']) . '</p>
                     </div>
-                </a>
+                    </button>
+                </form>
             </div>';
         }
         echo '</div>';

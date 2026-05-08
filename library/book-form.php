@@ -12,7 +12,31 @@ if (!isAdmin()) {
 }
 
 $user_id = currentUserId();
-$book_id = $_GET['id'] ?? null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $routeAction = $_POST['action'] ?? '';
+    if ($routeAction === 'prepare_create') {
+        verifyCsrfTokenOrFail();
+        unset($_SESSION['ssk_edit_book_id']);
+        header("Location: /library/book-form.php");
+        exit;
+    }
+    if ($routeAction === 'prepare_edit') {
+        verifyCsrfTokenOrFail();
+        $bid = (int)($_POST['book_id'] ?? 0);
+        if ($bid > 0) {
+            $stmt = $pdo->prepare("SELECT id FROM books WHERE id = ?");
+            $stmt->execute([$bid]);
+            if ($stmt->fetch()) {
+                $_SESSION['ssk_edit_book_id'] = $bid;
+            }
+        }
+        header("Location: /library/book-form.php");
+        exit;
+    }
+}
+
+$book_id = $_SESSION['ssk_edit_book_id'] ?? null;
 
 $title = '';
 $author = '';
@@ -40,7 +64,9 @@ if ($book_id) {
     $book = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$book) {
-        die("Book not found or unauthorized.");
+        unset($_SESSION['ssk_edit_book_id']);
+        header("Location: /library/book-form.php");
+        exit;
     }
 
     $title = $book['title'];
@@ -60,6 +86,10 @@ if ($book_id) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verifyCsrfTokenOrFail();
+    if (($_POST['action'] ?? '') !== '') {
+        header("Location: /library/book-form.php");
+        exit;
+    }
     $title = trim($_POST['title'] ?? '');
     $author = trim($_POST['author'] ?? '');
     $description = trim($_POST['description'] ?? '');
@@ -111,12 +141,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $stmt = $pdo->prepare("UPDATE books SET title=?, author=?, description=?, cover_url=?, category_id=?, isbn=?, publisher=?, publish_year=?, language=?, page_count=?, author_bio=?, format=?, edition=?, updated_at=CURRENT_TIMESTAMP WHERE id=?");
             $stmt->execute([$title, $author, $description, $cover_url, $category_id, $isbn, $publisher, $publish_year, $language, $page_count, $author_bio, $format, $edition, $book_id]);
-            header("Location: /library/book-details.php?id=" . $book_id);
+            unset($_SESSION['ssk_edit_book_id']);
+            $_SESSION['ssk_view_book_id'] = (int)$book_id;
+            header("Location: /library/book-details.php");
             exit;
         } else {
             $stmt = $pdo->prepare("INSERT INTO books (user_id, title, author, description, cover_url, category_id, isbn, publisher, publish_year, language, page_count, author_bio, format, edition) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([$user_id, $title, $author, $description, $cover_url, $category_id, $isbn, $publisher, $publish_year, $language, $page_count, $author_bio, $format, $edition]);
-            header("Location: /library/my-library.php");
+            $newId = (int)$pdo->lastInsertId();
+            unset($_SESSION['ssk_edit_book_id']);
+            $_SESSION['ssk_view_book_id'] = $newId;
+            header("Location: /library/book-details.php");
             exit;
         }
     }

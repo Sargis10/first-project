@@ -51,24 +51,29 @@ $pageScripts = ['assets/js/pages/index.js'];
                      data-title="<?= htmlspecialchars(strtolower($book['title'])) ?>" 
                      data-author="<?= htmlspecialchars(strtolower($book['author'])) ?>" 
                      data-category="<?= htmlspecialchars(strtolower($book['category_name'] ?? 'uncategorized')) ?>">
-                    <a href="/library/book-details.php?id=<?= $book['id'] ?>" class="card-link">
-                        <div class="card-image-wrap">
-                            <?php if ($book['cover_url']): ?>
-                                <img src="<?= htmlspecialchars($book['cover_url']) ?>" 
-                                     alt="Cover" 
-                                     onerror="this.onerror=null; this.src='https://placehold.co/400x600/1a1a1a/ffffff?text=<?= urlencode($book['title']) ?>';">
-                            <?php else: ?>
-                                <svg class="placeholder-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-                            <?php endif; ?>
-                        </div>
-                        <div class="card-content">
-                            <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-color); margin-bottom: 4px;">
-                                <?= htmlspecialchars($book['category_name'] ?? 'Uncategorized') ?>
+                    <form method="POST" action="/library/book-details.php" style="margin: 0;">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
+                        <input type="hidden" name="action" value="open_book">
+                        <input type="hidden" name="book_id" value="<?= (int)$book['id'] ?>">
+                        <button type="submit" class="card-link">
+                            <div class="card-image-wrap">
+                                <?php if ($book['cover_url']): ?>
+                                    <img src="<?= htmlspecialchars($book['cover_url']) ?>"
+                                         alt="Cover"
+                                         onerror="this.onerror=null; this.src='https://placehold.co/400x600/1a1a1a/ffffff?text=<?= urlencode($book['title']) ?>';">
+                                <?php else: ?>
+                                    <svg class="placeholder-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                                <?php endif; ?>
                             </div>
-                            <h3 class="card-title"><?= htmlspecialchars($book['title']) ?></h3>
-                            <p class="card-subtitle"><?= htmlspecialchars($book['author']) ?></p>
-                        </div>
-                    </a>
+                            <div class="card-content">
+                                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-color); margin-bottom: 4px;">
+                                    <?= htmlspecialchars($book['category_name'] ?? 'Uncategorized') ?>
+                                </div>
+                                <h3 class="card-title"><?= htmlspecialchars($book['title']) ?></h3>
+                                <p class="card-subtitle"><?= htmlspecialchars($book['author']) ?></p>
+                            </div>
+                        </button>
+                    </form>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -82,10 +87,14 @@ $pageScripts = ['assets/js/pages/index.js'];
                 <p style="color: var(--muted-color);">Start your collection by adding your first book.</p>
             </div>
             <?php if (isAdmin()): ?>
-            <a href="/library/book-form.php" class="btn btn-primary" style="margin-top: 16px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Add First Book
-            </a>
+            <form method="POST" action="/library/book-form.php" style="margin-top: 16px; display: inline-block;">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
+                <input type="hidden" name="action" value="prepare_create">
+                <button type="submit" class="btn btn-primary" style="margin: 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add First Book
+                </button>
+            </form>
             <?php endif; ?>
         </div>
     <?php endif; ?>

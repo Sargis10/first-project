@@ -132,6 +132,10 @@ Booking center(SSK)/
 - `/library/*` -> authenticated user pages
 - `/index.php` -> authenticated catalog page
 
+### Book pages and privacy-friendly URLs
+- `/library/book-details.php` and `/library/book-form.php` intentionally avoid `?id=` query strings in the address bar after navigation.
+- Opening a book or starting an edit uses a CSRF-protected POST; the active numeric id is kept in the session (`ssk_view_book_id`, `ssk_edit_book_id`). Direct GET access without a session context redirects back to the catalog.
+
 ### Access control behavior
 - Guest user:
   - can access login/register

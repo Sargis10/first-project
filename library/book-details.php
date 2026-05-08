@@ -7,8 +7,26 @@ if (!isLoggedIn()) {
 }
 
 $user_id = currentUserId();
-$book_id = $_GET['id'] ?? null;
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'open_book') {
+    verifyCsrfTokenOrFail();
+    $bid = (int)($_POST['book_id'] ?? 0);
+    if ($bid <= 0) {
+        header("Location: /index.php");
+        exit;
+    }
+    $check = $pdo->prepare("SELECT 1 FROM books WHERE id = ?");
+    $check->execute([$bid]);
+    if (!$check->fetchColumn()) {
+        header("Location: /index.php");
+        exit;
+    }
+    $_SESSION['ssk_view_book_id'] = $bid;
+    header("Location: /library/book-details.php");
+    exit;
+}
+
+$book_id = $_SESSION['ssk_view_book_id'] ?? null;
 if (!$book_id) {
     header("Location: /index.php");
     exit;
@@ -25,7 +43,9 @@ $stmt->execute([$book_id]);
 $book = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$book) {
-    die("Book not found or unauthorized to view this book.");
+    unset($_SESSION['ssk_view_book_id']);
+    header("Location: /index.php");
+    exit;
 }
 
 // Fetch user status for this book
@@ -36,37 +56,34 @@ $current_status = $row['status'] ?? 'none';
 $is_favorite = $row['is_favorite'] ?? 0;
 $pageStyles = ['assets/css/pages/book-details.css'];
 
-// Handle Status Update
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+// Handle mutations (book id comes from session only — not from URL)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] !== 'open_book') {
     verifyCsrfTokenOrFail();
-    if ($_POST['action'] === 'update_status') {
+    $act = $_POST['action'];
+    if ($act === 'update_status') {
         $new_status = $_POST['status'] ?? 'none';
         if ($new_status === 'none') {
             $pdo->prepare("DELETE FROM user_books WHERE user_id = ? AND book_id = ?")->execute([$user_id, $book_id]);
         } else {
             $pdo->prepare("INSERT INTO user_books (user_id, book_id, status) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = ?")->execute([$user_id, $book_id, $new_status, $new_status]);
         }
-    }
-    
-    if ($_POST['action'] === 'toggle_favorite') {
+    } elseif ($act === 'toggle_favorite') {
         $new_fav = $is_favorite ? 0 : 1;
         $pdo->prepare("INSERT INTO user_books (user_id, book_id, is_favorite) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE is_favorite = ?")->execute([$user_id, $book_id, $new_fav, $new_fav]);
-    }
-    
-    header("Location: /library/book-details.php?id=" . $book_id);
-    exit;
-}
+    } elseif ($act === 'delete') {
+        $stmt = $pdo->prepare("DELETE FROM books WHERE id = ? AND user_id = ?");
+        $stmt->execute([$book_id, $user_id]);
 
-// Handle Demetion
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
-    $stmt = $pdo->prepare("DELETE FROM books WHERE id = ? AND user_id = ?");
-    $stmt->execute([$book_id, $user_id]);
-    
-    if ($book['cover_url'] && file_exists($book['cover_url'])) {
-        unlink($book['cover_url']); // Delete the image file
+        if ($book['cover_url'] && file_exists($book['cover_url'])) {
+            unlink($book['cover_url']);
+        }
+
+        unset($_SESSION['ssk_view_book_id']);
+        header("Location: /index.php");
+        exit;
     }
 
-    header("Location: /index.php");
+    header("Location: /library/book-details.php");
     exit;
 }
 
@@ -92,9 +109,14 @@ function simpleMarkdown($text) {
         
         <div style="display: flex; gap: 8px;">
             <?php if (isAdmin() && $book['user_id'] == $user_id): ?>
-            <a href="/library/book-form.php?id=<?= $book['id'] ?>" class="btn btn-ghost" style="padding: 8px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="16 3 21 8 8 21 3 21 3 16 16 3"></polygon></svg>
-            </a>
+            <form method="POST" action="/library/book-form.php" style="margin: 0; display: inline;">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
+                <input type="hidden" name="action" value="prepare_edit">
+                <input type="hidden" name="book_id" value="<?= (int)$book['id'] ?>">
+                <button type="submit" class="btn btn-ghost" style="padding: 8px;" title="Edit book">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="16 3 21 8 8 21 3 21 3 16 16 3"></polygon></svg>
+                </button>
+            </form>
             <form method="POST" onsubmit="return confirm('Are you sure you want to delete this book?');" style="margin: 0;">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                 <input type="hidden" name="action" value="delete">

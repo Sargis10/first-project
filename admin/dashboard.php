@@ -101,10 +101,14 @@ $all_users = $pdo->query("
                 <svg style="margin-right: 8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                 Site Settings
             </a>
-            <a href="/library/book-form.php" class="btn btn-primary" style="font-size: 13px; padding: 10px 16px;">
-                <svg style="margin-right: 8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Add New Book
-            </a>
+            <form method="POST" action="/library/book-form.php" style="margin: 0; display: inline;">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
+                <input type="hidden" name="action" value="prepare_create">
+                <button type="submit" class="btn btn-primary" style="font-size: 13px; padding: 10px 16px;">
+                    <svg style="margin-right: 8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add New Book
+                </button>
+            </form>
         </div>
     </div>
 
@@ -293,8 +297,18 @@ $all_users = $pdo->query("
                             <td style="padding: 16px 24px; color: var(--muted-color);"><?= date('M j, Y', strtotime($b['created_at'])) ?></td>
                             <td style="padding: 16px 24px; text-align: right;">
                                 <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                                    <a href="/library/book-form.php?id=<?= $b['id'] ?>" class="btn btn-outline" style="padding: 6px 12px; font-size: 12px; text-decoration: none;">Edit</a>
-                                    <a href="/library/book-details.php?id=<?= $b['id'] ?>" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; text-decoration: none;">View</a>
+                                    <form method="POST" action="/library/book-form.php" style="margin: 0;">
+                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
+                                        <input type="hidden" name="action" value="prepare_edit">
+                                        <input type="hidden" name="book_id" value="<?= (int)$b['id'] ?>">
+                                        <button type="submit" class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;">Edit</button>
+                                    </form>
+                                    <form method="POST" action="/library/book-details.php" style="margin: 0;">
+                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
+                                        <input type="hidden" name="action" value="open_book">
+                                        <input type="hidden" name="book_id" value="<?= (int)$b['id'] ?>">
+                                        <button type="submit" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;">View</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

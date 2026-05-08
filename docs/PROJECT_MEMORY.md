@@ -23,6 +23,7 @@ This file is the persistent working memory for this project and should be update
 - `admin/dashboard.php`, `admin/categories.php`, `admin/settings.php`
 - `library/catalog.php`, `library/my-library.php`, `library/book-form.php`, `library/book-details.php`, `library/stats.php`, `library/about.php`
 - `scripts/seed.php`
+- Book detail/edit routes avoid exposing numeric ids in the URL; session keys `ssk_view_book_id` / `ssk_edit_book_id` after CSRF POST handoff.
 
 ## Database Map (authoritative)
 - `users`: id, role, email, password, created_at
