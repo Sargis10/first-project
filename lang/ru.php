@@ -29,7 +29,6 @@ return [
     'index.title' => 'Моя библиотека',
     'index.subtitle' => 'Изучайте полный каталог библиотеки.',
     'index.search_placeholder' => 'Поиск книг...',
-    'index.search_label' => 'Поиск по каталогу',
     'index.all_books' => 'Все книги',
     'index.no_books_title' => 'Книги не найдены',
     'index.no_books_subtitle' => 'Начните коллекцию, добавив первую книгу.',

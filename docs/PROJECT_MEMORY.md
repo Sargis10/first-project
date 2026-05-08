@@ -46,7 +46,7 @@ This file is the persistent working memory for this project and should be update
 - MySQL/MariaDB server
 
 ## Latest updates (2026-05-09)
-- Catalog search UX: on `index.php` the search field is no longer a narrow pill beside the H1; it sits in its own full-width panel below the title (editorial / e-commerce catalog pattern), with label `index.search_label` in all UI languages.
+- Catalog search UX: on `index.php` the search field is a full-width bar below the title; no duplicate label above the field; input uses a light glass style (`backdrop-filter`) so the page background art stays visible.
 - Security hardening: env-based DB credentials, CSRF protection on state-changing forms, stricter session cookie settings, and safer error output.
 - UI upgrade: redesigned `library/about.php` with rich default content and custom `assets/css/pages/about.css`.
 - Visual identity: global classic-library background art with readable overlay tuning in `CSS/style.css`.

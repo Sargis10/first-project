@@ -29,7 +29,6 @@ return [
     'index.title' => 'Ma bibliothèque',
     'index.subtitle' => 'Explorez le catalogue complet de la bibliothèque.',
     'index.search_placeholder' => 'Rechercher des livres...',
-    'index.search_label' => 'Recherche dans le catalogue',
     'index.all_books' => 'Tous les livres',
     'index.no_books_title' => 'Aucun livre trouvé',
     'index.no_books_subtitle' => 'Commencez votre collection en ajoutant le premier livre.',

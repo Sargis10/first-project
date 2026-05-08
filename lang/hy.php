@@ -29,7 +29,6 @@ return [
     'index.title' => 'Իմ գրադարանը',
     'index.subtitle' => 'Ուսումնասիրեք ամբողջ գրքային կատալոգը։',
     'index.search_placeholder' => 'Փնտրել գրքեր...',
-    'index.search_label' => 'Կատալոգի որոնում',
     'index.all_books' => 'Բոլոր գրքերը',
     'index.no_books_title' => 'Գրքեր չեն գտնվել',
     'index.no_books_subtitle' => 'Սկսեք ձեր հավաքածուն՝ ավելացնելով առաջին գիրքը։',
