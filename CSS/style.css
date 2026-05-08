@@ -82,8 +82,8 @@ h1, h2, h3, h4 {
     padding: 0 24px;
 }
 
-/* --- NAVBAR (Glass Effect) --- */
-header {
+/* --- NAVBAR (Glass Effect) — only the top bar; do not style <header> inside <main> (e.g. catalog sections) --- */
+header.site-header {
     position: sticky;
     top: 0;
     z-index: 50;
@@ -94,7 +94,7 @@ header {
     padding: 16px 0;
 }
 
-header .container {
+header.site-header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -289,11 +289,7 @@ main {
     margin-bottom: 40px;
 }
 
-/* --- CATALOG (index): title block + full-width search (common pattern: hero, then search bar, then filters) --- */
-.catalog-page .catalog-hero {
-    margin-bottom: 1.5rem;
-}
-
+/* --- CATALOG (index): full-width search, then filters --- */
 .catalog-search-panel {
     margin-bottom: 1.75rem;
 }

@@ -30,13 +30,6 @@ $pageScripts = ['assets/js/pages/index.js'];
 <?php include 'includes/header.php'; ?>
 
 <main class="container catalog-page">
-    <header class="catalog-hero">
-        <div class="page-title">
-            <h1><?= htmlspecialchars(t('index.title')) ?></h1>
-            <p><?= htmlspecialchars(t('index.subtitle')) ?></p>
-        </div>
-    </header>
-
     <section class="catalog-search-panel" aria-labelledby="catalogSearchLabel">
         <label id="catalogSearchLabel" class="catalog-search-label" for="searchInput"><?= htmlspecialchars(t('index.search_label')) ?></label>
         <div class="search-container catalog-search-field">
