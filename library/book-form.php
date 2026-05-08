@@ -213,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <option value="">Select a Category</option>
                         <?php foreach($categories as $cat): ?>
                             <option value="<?= $cat['id'] ?>" <?= $category_id == $cat['id'] ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($cat['name']) ?>
+                                <?= htmlspecialchars(sskCategoryDisplayName($cat)) ?>
                             </option>
                         <?php endforeach; ?>
                     </select>

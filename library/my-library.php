@@ -23,7 +23,8 @@ $stats = $stats_stmt->fetch(PDO::FETCH_ASSOC);
 // 2. Fetch Different Sections
 // FAVORITES
 $fav_stmt = $pdo->prepare("
-    SELECT books.*, categories.name as category_name 
+    SELECT books.*, categories.name as category_name, categories.slug as category_slug,
+           categories.name_i18n as category_name_i18n
     FROM user_books 
     JOIN books ON user_books.book_id = books.id 
     LEFT JOIN categories ON books.category_id = categories.id
@@ -34,7 +35,8 @@ $favorites = $fav_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // CURRENTLY READING
 $reading_stmt = $pdo->prepare("
-    SELECT books.*, categories.name as category_name 
+    SELECT books.*, categories.name as category_name, categories.slug as category_slug,
+           categories.name_i18n as category_name_i18n
     FROM user_books 
     JOIN books ON user_books.book_id = books.id 
     LEFT JOIN categories ON books.category_id = categories.id
@@ -45,7 +47,8 @@ $reading = $reading_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // WANT TO READ
 $want_stmt = $pdo->prepare("
-    SELECT books.*, categories.name as category_name 
+    SELECT books.*, categories.name as category_name, categories.slug as category_slug,
+           categories.name_i18n as category_name_i18n
     FROM user_books 
     JOIN books ON user_books.book_id = books.id 
     LEFT JOIN categories ON books.category_id = categories.id
@@ -56,7 +59,8 @@ $want_to_read = $want_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // COMPLETED (READ)
 $completed_stmt = $pdo->prepare("
-    SELECT books.*, categories.name as category_name 
+    SELECT books.*, categories.name as category_name, categories.slug as category_slug,
+           categories.name_i18n as category_name_i18n
     FROM user_books 
     JOIN books ON user_books.book_id = books.id 
     LEFT JOIN categories ON books.category_id = categories.id
@@ -67,7 +71,8 @@ $completed = $completed_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // YOUR UPLOADS
 $uploads_stmt = $pdo->prepare("
-    SELECT books.*, categories.name as category_name 
+    SELECT books.*, categories.name as category_name, categories.slug as category_slug,
+           categories.name_i18n as category_name_i18n
     FROM books 
     LEFT JOIN categories ON books.category_id = categories.id
     WHERE books.user_id = ? 
@@ -159,7 +164,7 @@ function renderBookGrid($books, $emptyMsg) {
                              onerror="this.onerror=null; this.src=\'https://placehold.co/400x600/1a1a1a/ffffff?text=' . urlencode($b['title']) . '\';">
                     </div>
                     <div>
-                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-color); margin-bottom: 6px;">' . htmlspecialchars($b['category_name'] ?: 'General') . '</div>
+                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-color); margin-bottom: 6px;">' . htmlspecialchars(sskBookCategoryDisplay($b)) . '</div>
                         <h4 style="font-size: 17px; font-weight: 700; margin-bottom: 4px; line-height: 1.3;">' . htmlspecialchars($b['title']) . '</h4>
                         <p style="font-size: 14px; color: var(--muted-color);">' . htmlspecialchars($b['author']) . '</p>
                     </div>

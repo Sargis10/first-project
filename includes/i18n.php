@@ -1,6 +1,6 @@
 <?php
 
-const SSK_LANGUAGES = ['en', 'hy', 'ru', 'fr'];
+const SSK_LANGUAGES = ['en', 'hy', 'ru', 'fr', 'de', 'it'];
 const SSK_DEFAULT_LANG = 'en';
 
 function sskCurrentLang(): string
@@ -62,6 +62,8 @@ function sskLanguageMeta(): array
         'hy' => ['flag' => '🇦🇲', 'label' => 'Հայերեն'],
         'ru' => ['flag' => '🇷🇺', 'label' => 'Русский'],
         'fr' => ['flag' => '🇫🇷', 'label' => 'Français'],
+        'de' => ['flag' => '🇩🇪', 'label' => 'Deutsch'],
+        'it' => ['flag' => '🇮🇹', 'label' => 'Italiano'],
     ];
 }
 

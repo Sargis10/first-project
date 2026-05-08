@@ -34,7 +34,8 @@ if (!$book_id) {
 
 // Fetch the book
 $stmt = $pdo->prepare("
-    SELECT books.*, categories.name as category_name 
+    SELECT books.*, categories.name as category_name, categories.slug as category_slug,
+           categories.name_i18n as category_name_i18n
     FROM books 
     LEFT JOIN categories ON books.category_id = categories.id 
     WHERE books.id = ?
@@ -144,7 +145,7 @@ function simpleMarkdown($text) {
             <div style="display: flex; flex-direction: column; gap: 32px;">
                 <div>
                     <div style="font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-color); margin-bottom: 12px;">
-                        <?= htmlspecialchars($book['category_name'] ?? 'Uncategorized') ?>
+                        <?= htmlspecialchars(sskBookCategoryDisplay($book)) ?>
                     </div>
                     <h1 style="font-size: 48px; font-family: var(--font-serif); line-height: 1.1; margin-bottom: 8px;"><?= htmlspecialchars($book['title']) ?></h1>
                     <p style="font-size: 24px; color: var(--muted-color); font-style: italic;">by <?= htmlspecialchars($book['author']) ?></p>

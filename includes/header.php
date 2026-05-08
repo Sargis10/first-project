@@ -5,7 +5,7 @@ $pageStyles = $pageStyles ?? [];
 $pageScripts = $pageScripts ?? [];
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(sskCurrentLang()) ?>">
 
 <head>
     <meta charset="UTF-8">
@@ -21,6 +21,7 @@ $pageScripts = $pageScripts ?? [];
         ?>
         <link rel="stylesheet" href="<?= htmlspecialchars($resolvedStylePath) ?>">
     <?php endforeach; ?>
+    <script src="/assets/js/lang-menu.js" defer></script>
 </head>
 
 <body>
@@ -76,16 +77,26 @@ $pageScripts = $pageScripts ?? [];
                 <?php else: ?>
                     <a href="/auth/login.php" class="btn btn-outline"><?= htmlspecialchars(t('nav.login')) ?></a>
                 <?php endif; ?>
-                <?php $langs = sskLanguageMeta(); $activeLang = sskCurrentLang(); ?>
-                <div class="lang-switcher" aria-label="<?= htmlspecialchars(t('nav.lang.aria')) ?>">
-                    <?php foreach ($langs as $code => $meta): ?>
-                        <a href="<?= htmlspecialchars(sskLanguageHref($code)) ?>"
-                           class="lang-pill <?= $activeLang === $code ? 'active' : '' ?>"
-                           title="<?= htmlspecialchars($meta['label']) ?>">
-                            <span><?= $meta['flag'] ?></span>
-                            <span><?= htmlspecialchars($meta['label']) ?></span>
-                        </a>
-                    <?php endforeach; ?>
+                <?php $langs = sskLanguageMeta(); $activeLang = sskCurrentLang(); $activeMeta = $langs[$activeLang] ?? $langs['en']; ?>
+                <div class="lang-menu" aria-label="<?= htmlspecialchars(t('nav.lang.aria')) ?>">
+                    <button type="button" class="lang-menu__trigger" aria-expanded="false" aria-haspopup="true" aria-controls="langMenuPanel" id="langMenuTrigger">
+                        <span class="lang-menu__trigger-flag" aria-hidden="true"><?= $activeMeta['flag'] ?></span>
+                        <span class="lang-menu__trigger-label"><?= htmlspecialchars($activeMeta['label']) ?></span>
+                        <svg class="lang-menu__chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <ul class="lang-menu__panel" id="langMenuPanel" role="menu" aria-labelledby="langMenuTrigger">
+                        <?php foreach ($langs as $code => $meta): ?>
+                            <li role="none">
+                                <a role="menuitem" href="<?= htmlspecialchars(sskLanguageHref($code)) ?>"
+                                   class="lang-menu__option <?= $activeLang === $code ? 'is-active' : '' ?>"
+                                   lang="<?= htmlspecialchars($code) ?>"
+                                   hreflang="<?= htmlspecialchars($code) ?>">
+                                    <span class="lang-menu__opt-flag" aria-hidden="true"><?= $meta['flag'] ?></span>
+                                    <span><?= htmlspecialchars($meta['label']) ?></span>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
                 </div>
             </nav>
         </div>

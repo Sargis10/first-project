@@ -59,13 +59,21 @@ $top_uploaders_data = $pdo->query("
 
 // Data for Category Distribution (Top 5 categories)
 $category_distribution_data = $pdo->query("
-    SELECT categories.name as category_name, COUNT(books.id) as count 
+    SELECT categories.name as category_name, categories.name_i18n as category_name_i18n,
+           COUNT(books.id) as count 
     FROM categories 
     JOIN books ON categories.id = books.category_id 
     GROUP BY categories.id 
     ORDER BY count DESC 
     LIMIT 5
 ")->fetchAll(PDO::FETCH_ASSOC);
+foreach ($category_distribution_data as &$catRow) {
+    $catRow['category_label'] = sskCategoryDisplayName([
+        'name' => $catRow['category_name'],
+        'name_i18n' => $catRow['category_name_i18n'] ?? null,
+    ]);
+}
+unset($catRow);
 
 // Get recent books (Title, Author, Created_at) max 10
 $recent_books = $pdo->query("
@@ -248,7 +256,7 @@ $all_users = $pdo->query("
                 new Chart(document.getElementById('categoryDistributionChart'), {
                     type: 'doughnut',
                     data: {
-                        labels: safeMap(categoryDistributionData, d => d.category_name || 'Unknown'),
+                        labels: safeMap(categoryDistributionData, d => d.category_label || d.category_name || 'Unknown'),
                         datasets: [{
                             data: safeMap(categoryDistributionData, d => d.count),
                             backgroundColor: ['#1A1A1A', '#5A5A40', '#717171', '#A8A29E', '#E5E5E5'],

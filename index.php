@@ -11,7 +11,8 @@ $limit = 20;
 $offset = 0;
 
 $stmt = $pdo->prepare("
-    SELECT books.*, categories.name as category_name 
+    SELECT books.*, categories.name as category_name, categories.slug as category_slug,
+           categories.name_i18n as category_name_i18n
     FROM books 
     LEFT JOIN categories ON books.category_id = categories.id 
     ORDER BY created_at DESC
@@ -45,8 +46,8 @@ $pageScripts = ['assets/js/pages/index.js'];
     <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px;" id="categoryFilters">
         <button class="btn btn-primary cat-filter" data-category="all" style="border-radius: 99px;"><?= htmlspecialchars(t('index.all_books')) ?></button>
         <?php foreach($categories as $cat): ?>
-            <button class="btn btn-outline cat-filter" data-category="<?= htmlspecialchars(strtolower($cat['name'])) ?>" style="border-radius: 99px; font-size: 13px;">
-                <?= htmlspecialchars($cat['name']) ?>
+            <button class="btn btn-outline cat-filter" data-category="<?= htmlspecialchars(sskCategorySlugForFilter($cat)) ?>" style="border-radius: 99px; font-size: 13px;">
+                <?= htmlspecialchars(sskCategoryDisplayName($cat)) ?>
             </button>
         <?php endforeach; ?>
     </div>
@@ -57,7 +58,7 @@ $pageScripts = ['assets/js/pages/index.js'];
                 <div class="card-item" 
                      data-title="<?= htmlspecialchars(strtolower($book['title'])) ?>" 
                      data-author="<?= htmlspecialchars(strtolower($book['author'])) ?>" 
-                     data-category="<?= htmlspecialchars(strtolower($book['category_name'] ?? 'uncategorized')) ?>">
+                     data-category="<?= htmlspecialchars(!empty($book['category_id']) ? sskCategorySlugForFilter(['slug' => $book['category_slug'] ?? '', 'name' => $book['category_name'] ?? '']) : 'uncategorized') ?>">
                     <form method="POST" action="/library/book-details.php" style="margin: 0;">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                         <input type="hidden" name="action" value="open_book">
@@ -74,7 +75,7 @@ $pageScripts = ['assets/js/pages/index.js'];
                             </div>
                             <div class="card-content">
                                 <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-color); margin-bottom: 4px;">
-                                    <?= htmlspecialchars($book['category_name'] ?? t('books.uncategorized')) ?>
+                                    <?= htmlspecialchars(sskBookCategoryDisplay($book)) ?>
                                 </div>
                                 <h3 class="card-title"><?= htmlspecialchars($book['title']) ?></h3>
                                 <p class="card-subtitle"><?= htmlspecialchars($book['author']) ?></p>

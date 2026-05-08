@@ -118,36 +118,111 @@ header .container {
     gap: 16px;
 }
 
-.lang-switcher {
-    display: inline-flex;
-    gap: 6px;
-    align-items: center;
-    padding-left: 6px;
+/* Language dropdown (compact; opens on hover, focus-within, or tap) */
+.lang-menu {
+    position: relative;
+    flex-shrink: 0;
 }
 
-.lang-pill {
+.lang-menu__trigger {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    text-decoration: none;
+    margin: 0;
+    padding: 6px 10px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
     color: var(--ink-color);
     background: rgba(255, 255, 255, 0.45);
     border: 1px solid rgba(90, 90, 64, 0.18);
     border-radius: 999px;
-    padding: 6px 10px;
-    font-size: 12px;
+    cursor: pointer;
+    line-height: 1.2;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.lang-menu__trigger:hover,
+.lang-menu:focus-within .lang-menu__trigger,
+.lang-menu.lang-menu--open .lang-menu__trigger {
+    background: rgba(255, 254, 250, 0.92);
+    border-color: rgba(90, 90, 64, 0.28);
+}
+
+.lang-menu__trigger-flag,
+.lang-menu__opt-flag {
+    font-size: 1.05em;
     line-height: 1;
 }
 
-.lang-pill.active {
-    background: var(--ink-color);
-    color: var(--bg-color);
-    border-color: var(--ink-color);
+.lang-menu__chevron {
+    flex-shrink: 0;
+    opacity: 0.65;
+    transition: transform 0.2s ease;
+}
+
+.lang-menu:hover .lang-menu__chevron,
+.lang-menu:focus-within .lang-menu__chevron,
+.lang-menu.lang-menu--open .lang-menu__chevron {
+    transform: rotate(180deg);
+}
+
+.lang-menu__panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    min-width: 12.5rem;
+    background: var(--bg-elevated);
+    border: 1px solid rgba(90, 90, 64, 0.14);
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(26, 26, 26, 0.12);
+    z-index: 200;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+}
+
+.lang-menu:hover .lang-menu__panel,
+.lang-menu:focus-within .lang-menu__panel,
+.lang-menu.lang-menu--open .lang-menu__panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.lang-menu__option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--ink-color);
+    font-size: 13px;
+    transition: background 0.12s ease;
+}
+
+.lang-menu__option:hover,
+.lang-menu__option:focus-visible {
+    background: rgba(90, 90, 64, 0.08);
+    outline: none;
+}
+
+.lang-menu__option.is-active {
+    background: rgba(26, 26, 26, 0.06);
+    font-weight: 600;
 }
 
 @media (max-width: 980px) {
-    .lang-pill span:last-child {
-        display: none;
+    .lang-menu__trigger-label {
+        max-width: 7.5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 }
 
@@ -399,13 +474,138 @@ button.card-link {
 }
 
 /* --- FOOTER --- */
-footer {
-    padding: 40px 0;
-    text-align: center;
-    border-top: 1px solid rgba(90, 90, 64, 0.1);
-    background: linear-gradient(180deg, transparent, rgba(235, 228, 214, 0.25));
+.site-footer {
+    margin-top: auto;
+    border-top: 1px solid rgba(90, 90, 64, 0.12);
+    background: linear-gradient(180deg, rgba(235, 228, 214, 0.35), rgba(244, 241, 234, 0.65));
+    box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.5);
 }
-footer p {
+
+.site-footer__main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) repeat(3, minmax(0, 0.85fr)) minmax(0, 1.2fr);
+    gap: 2rem 1.75rem;
+    padding: 3rem 20px 2.25rem;
+    align-items: start;
+}
+
+@media (max-width: 960px) {
+    .site-footer__main {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .site-footer__main {
+        grid-template-columns: 1fr;
+        padding: 2.25rem 20px 1.75rem;
+        gap: 1.75rem;
+    }
+}
+
+.site-footer__brand {
+    padding-right: 0.5rem;
+}
+
+.site-footer__logo {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--ink-color);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+}
+
+.site-footer__logo:hover {
+    color: var(--accent-color);
+}
+
+.site-footer__tagline {
+    margin-top: 0.65rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
     color: var(--muted-color);
-    font-size: 14px;
+    max-width: 22rem;
+}
+
+.site-footer__made {
+    margin-top: 0.85rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--muted-color);
+    opacity: 0.92;
+    max-width: 22rem;
+}
+
+.site-footer__heading {
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ink-color);
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.01em;
+}
+
+.site-footer__links,
+.site-footer__checks {
+    list-style: none;
+}
+
+.site-footer__links li + li,
+.site-footer__checks li + li {
+    margin-top: 0.45rem;
+}
+
+.site-footer__links a {
+    color: var(--muted-color);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.15s ease;
+}
+
+.site-footer__links a:hover {
+    color: var(--accent-color);
+}
+
+.site-footer__checks li {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--muted-color);
+    padding-left: 0.85rem;
+    position: relative;
+}
+
+.site-footer__checks li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.45em;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    opacity: 0.65;
+}
+
+.site-footer__blurb {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--muted-color);
+    max-width: 28rem;
+}
+
+.site-footer__col--wide {
+    min-width: 0;
+}
+
+.site-footer__bottom {
+    border-top: 1px solid rgba(90, 90, 64, 0.08);
+    background: rgba(255, 254, 250, 0.45);
+    padding: 1rem 0;
+}
+
+.site-footer__copyright {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--muted-color);
 }

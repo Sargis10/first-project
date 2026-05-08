@@ -15,6 +15,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 require_once __DIR__ . '/i18n.php';
+require_once __DIR__ . '/category_i18n.php';
 sskSetLangFromRequest();
 
 function loadEnvFile($filePath) {
@@ -138,7 +139,9 @@ try {
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS categories (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(255) NOT NULL UNIQUE
+            name VARCHAR(255) NOT NULL UNIQUE,
+            slug VARCHAR(191) NULL,
+            name_i18n TEXT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
 
@@ -209,6 +212,49 @@ try {
     foreach ($bookColumns as $column => $sql) {
         if (tableExists($pdo, $db, 'books') && !columnExists($pdo, $db, 'books', $column)) {
             $pdo->exec($sql);
+        }
+    }
+
+    if (tableExists($pdo, $db, 'categories')) {
+        if (!columnExists($pdo, $db, 'categories', 'slug')) {
+            $pdo->exec("ALTER TABLE categories ADD COLUMN slug VARCHAR(191) NULL");
+        }
+        if (!columnExists($pdo, $db, 'categories', 'name_i18n')) {
+            $pdo->exec("ALTER TABLE categories ADD COLUMN name_i18n TEXT NULL");
+        }
+
+        $pending = $pdo->query("
+            SELECT id, name, slug, name_i18n FROM categories
+            WHERE slug IS NULL OR slug = '' OR name_i18n IS NULL OR name_i18n = ''
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($pending as $c) {
+            $name = (string)$c['name'];
+            $names = [];
+            foreach (SSK_LANGUAGES as $lc) {
+                $names[$lc] = $name;
+            }
+            $json = sskCategoryNamesJson($names);
+            $baseSlug = sskSlugifyCategory($name);
+            if ($baseSlug === '') {
+                $baseSlug = 'cat-' . (int)$c['id'];
+            }
+            $slug = sskEnsureUniqueCategorySlug($pdo, $baseSlug, (int)$c['id']);
+            $upd = $pdo->prepare('UPDATE categories SET slug = ?, name_i18n = ? WHERE id = ?');
+            $upd->execute([$slug, $json, (int)$c['id']]);
+        }
+
+        try {
+            $chk = $pdo->prepare("
+                SELECT COUNT(*) FROM information_schema.statistics
+                WHERE table_schema = ? AND table_name = 'categories' AND index_name = 'categories_slug_unique'
+            ");
+            $chk->execute([$db]);
+            if ((int)$chk->fetchColumn() === 0) {
+                $pdo->exec('ALTER TABLE categories ADD UNIQUE KEY categories_slug_unique (slug)');
+            }
+        } catch (Throwable $e) {
+            // Older snapshots may still have duplicate slugs; app layer enforces uniqueness on write.
         }
     }
 } catch (Throwable $e) {

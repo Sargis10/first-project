@@ -21,7 +21,8 @@ $offset = max(0, $offset);
 $fetchLimit = $limit + 1; // one extra to detect "has more"
 
 $sql = "
-    SELECT books.*, categories.name as category_name
+    SELECT books.*, categories.name as category_name, categories.slug as category_slug,
+           categories.name_i18n as category_name_i18n
     FROM books
     LEFT JOIN categories ON books.category_id = categories.id
     WHERE 1=1
@@ -29,7 +30,7 @@ $sql = "
 $params = [];
 
 if ($category !== '' && strtolower($category) !== 'all') {
-    $sql .= " AND LOWER(COALESCE(categories.name, 'uncategorized')) = :category";
+    $sql .= " AND LOWER(COALESCE(categories.slug, '')) = :category";
     $params[':category'] = strtolower($category);
 }
 
@@ -58,13 +59,15 @@ foreach ($rows as $book) {
     $bookId = (int)$book['id'];
     $title = strtolower((string)($book['title'] ?? ''));
     $author = strtolower((string)($book['author'] ?? ''));
-    $category = strtolower((string)($book['category_name'] ?? 'uncategorized'));
+    $slug = isset($book['category_slug']) && $book['category_slug'] !== ''
+        ? mb_strtolower((string)$book['category_slug'], 'UTF-8')
+        : 'uncategorized';
 
     $html .= '
         <div class="card-item" 
              data-title="' . htmlspecialchars($title) . '" 
              data-author="' . htmlspecialchars($author) . '" 
-             data-category="' . htmlspecialchars($category) . '">
+             data-category="' . htmlspecialchars($slug) . '">
             <form method="POST" action="/library/book-details.php" style="margin: 0;">
                 <input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrfToken()) . '">
                 <input type="hidden" name="action" value="open_book">
@@ -81,7 +84,7 @@ foreach ($rows as $book) {
                     </div>
                     <div class="card-content">
                         <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-color); margin-bottom: 4px;">
-                            ' . htmlspecialchars($book['category_name'] ?? t('books.uncategorized')) . '
+                            ' . htmlspecialchars(sskBookCategoryDisplay($book)) . '
                         </div>
                         <h3 class="card-title">' . htmlspecialchars($book['title'] ?? '') . '</h3>
                         <p class="card-subtitle">' . htmlspecialchars($book['author'] ?? '') . '</p>

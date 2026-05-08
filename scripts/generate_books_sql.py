@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import json
+import re
 import sys
 import time
+import unicodedata
 import urllib.parse
 import urllib.request
 import urllib.error
@@ -19,6 +21,8 @@ SUBJECTS = [
 
 BOOKS_PER_CATEGORY = 50
 
+UI_LANGS = ["en", "hy", "ru", "fr", "de", "it"]
+
 
 def fetch_json(url: str, retries: int = 4):
     req = urllib.request.Request(url, headers={"User-Agent": "ssk-seeder/1.0"})
@@ -35,6 +39,18 @@ def fetch_json(url: str, retries: int = 4):
 
 def sql_escape(value: str) -> str:
     return value.replace("\\", "\\\\").replace("'", "\\'")
+
+
+def slugify_ascii(label: str) -> str:
+    s = unicodedata.normalize("NFKD", label).encode("ascii", "ignore").decode("ascii")
+    s = s.lower()
+    s = re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+    return s if s else "category"
+
+
+def category_i18n_json(name: str) -> str:
+    payload = {lc: name for lc in UI_LANGS}
+    return sql_escape(json.dumps(payload, ensure_ascii=False))
 
 
 def clean_text(value, fallback=""):
@@ -137,8 +153,13 @@ def build_sql(owner_id: int, books):
     lines.append("")
 
     for category_name, _ in SUBJECTS:
+        slug = slugify_ascii(category_name)
         lines.append(
-            "INSERT INTO categories (name) VALUES ('{}');".format(sql_escape(category_name))
+            "INSERT INTO categories (name, slug, name_i18n) VALUES ('{name}', '{slug}', '{i18n}');".format(
+                name=sql_escape(category_name),
+                slug=sql_escape(slug),
+                i18n=category_i18n_json(category_name),
+            )
         )
     lines.append("")
 

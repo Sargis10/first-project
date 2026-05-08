@@ -27,9 +27,15 @@ CREATE TABLE IF NOT EXISTS users (
 ----------------------------
 Purpose: Master list of book categories.
 
+- `name`: canonical English label (unique), aligned with `name_i18n.en` when possible.
+- `slug`: stable ASCII key for filters and APIs (unique after migration).
+- `name_i18n`: JSON object with keys `en`, `hy`, `ru`, `fr`, `de`, `it` for display per UI language.
+
 CREATE TABLE IF NOT EXISTS categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE
+    name VARCHAR(255) NOT NULL UNIQUE,
+    slug VARCHAR(191) NULL,
+    name_i18n TEXT NULL
 );
 
 

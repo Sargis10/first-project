@@ -10,7 +10,7 @@ $user_id = currentUserId();
 
 // Query for favorite categories (Read the most)
 $stats_stmt = $pdo->prepare("
-    SELECT categories.name, COUNT(*) as count 
+    SELECT categories.name, categories.name_i18n, COUNT(*) as count 
     FROM user_books 
     JOIN books ON user_books.book_id = books.id 
     JOIN categories ON books.category_id = categories.id 
@@ -71,7 +71,7 @@ $summary = $summary_stmt->fetch(PDO::FETCH_ASSOC);
                     <?php foreach($fav_categories as $index => $cat): ?>
                         <div>
                             <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; font-weight: 500;">
-                                <span><?= htmlspecialchars($cat['name']) ?></span>
+                                <span><?= htmlspecialchars(sskCategoryDisplayName(['name' => $cat['name'], 'name_i18n' => $cat['name_i18n'] ?? null])) ?></span>
                                 <span style="opacity: 0.6;"><?= $cat['count'] ?> books</span>
                             </div>
                             <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; width: 100%;">
