@@ -9,11 +9,14 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- categories.name_i18n: ONE TEXT column holding UTF-8 JSON (not six MySQL columns).
+-- Keys must match app languages: en, hy, ru, fr, de, it. Empty string = "use another language fallback" (see includes/category_i18n.php).
+-- Example: {"en":"Business","hy":"Բիզնես","ru":"Бизнес","fr":"Affaires","de":"Wirtschaft","it":"Business"}
 CREATE TABLE IF NOT EXISTS categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
     slug VARCHAR(191) NULL,
-    name_i18n TEXT NULL
+    name_i18n TEXT NULL COMMENT 'JSON: en, hy, ru, fr, de, it — localized display names'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS books (

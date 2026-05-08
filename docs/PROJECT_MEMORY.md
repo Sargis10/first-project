@@ -27,7 +27,7 @@ This file is the persistent working memory for this project and should be update
 
 ## Database Map (authoritative)
 - `users`: id, role, email, password, created_at
-- `categories`: id, name (canonical English label, unique), slug (stable ASCII key for filters, unique), name_i18n (JSON object: `en`, `hy`, `ru`, `fr`, `de`, `it`)
+- `categories`: id, name (canonical English label, unique), slug (stable ASCII key for filters, unique), **name_i18n** — one `TEXT` column containing JSON (logical “six fields”: keys `en`, `hy`, `ru`, `fr`, `de`, `it`; not six separate SQL columns). See `README.md` §5 and `database/tables.txt`.
 - `books`: id, user_id, title, author, description, cover_url, created_at, updated_at, category_id, isbn, publisher, publish_year, language, page_count, author_bio, format, edition
 - `user_books`: id, user_id, book_id, status, is_favorite, created_at, updated_at, unique(user_id, book_id)
 - `site_settings`: setting_key, setting_value, updated_at
@@ -46,6 +46,7 @@ This file is the persistent working memory for this project and should be update
 - MySQL/MariaDB server
 
 ## Latest updates (2026-05-09)
+- Category i18n backfill CLI: `scripts/backfill-category-translations.php` writes six-language JSON for known genre slugs; docs updated (`README.md`, `database/tables.txt`, `database_schema.sql` column comment).
 - Catalog search UX: index page has no duplicate H1/subtitle block; only `index.search_label` + search field + category chips. **Site nav** uses `header.site-header` so inner `<header>` elements are not styled with the glass navbar (that had caused a large frosted panel on the catalog).
 - Security hardening: env-based DB credentials, CSRF protection on state-changing forms, stricter session cookie settings, and safer error output.
 - UI upgrade: redesigned `library/about.php` with rich default content and custom `assets/css/pages/about.css`.

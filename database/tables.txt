@@ -27,9 +27,41 @@ CREATE TABLE IF NOT EXISTS users (
 ----------------------------
 Purpose: Master list of book categories.
 
-- `name`: canonical English label (unique), aligned with `name_i18n.en` when possible.
-- `slug`: stable ASCII key for filters and APIs (unique after migration).
-- `name_i18n`: JSON object with keys `en`, `hy`, `ru`, `fr`, `de`, `it` for display per UI language.
+Physical columns in MySQL (this table does NOT use six separate VARCHAR columns for languages):
+
+- `id`: primary key.
+- `name`: canonical label (unique). The app keeps this aligned with the English display string (`name_i18n.en`) when admins save categories.
+- `slug`: stable ASCII key for filters, URLs, and APIs (unique after migration). Example: `business`, `science-fiction`.
+- `name_i18n`: a **single TEXT** column storing **one JSON object**. That object has **six string keys** — one per UI language — not six DB columns:
+  - `en` — English
+  - `hy` — Armenian (Հայերեն)
+  - `ru` — Russian
+  - `fr` — French
+  - `de` — German
+  - `it` — Italian
+
+Rules in code (`includes/category_i18n.php`):
+
+- The visitor’s session language (`sskCurrentLang()`) picks `name_i18n[lang]` when it is non-empty.
+- If that key is empty, the UI falls back to another filled key (English preferred), then to `categories.name`.
+- Admin UI (`admin/categories.php`) edits all six keys; saving runs `UPDATE categories SET name = ?, slug = ?, name_i18n = ?`.
+
+Example JSON value (pretty-printed for humans; stored as one line in MySQL):
+
+```json
+{
+  "en": "Science Fiction",
+  "hy": "Գիտական ֆանտաստիկա",
+  "ru": "Научная фантастика",
+  "fr": "Science-fiction",
+  "de": "Science-Fiction",
+  "it": "Fantascienza"
+}
+```
+
+Bulk seed for the default genre list (local or server DB): from project root run  
+`php scripts/backfill-category-translations.php`  
+(see `README.md` §5).
 
 CREATE TABLE IF NOT EXISTS categories (
     id INT AUTO_INCREMENT PRIMARY KEY,

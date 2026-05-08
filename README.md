@@ -65,6 +65,7 @@ Booking center(SSK)/
     footer.php
   scripts/
     seed.php
+    backfill-category-translations.php
   database/
     database_schema.sql
     tables.txt
@@ -158,7 +159,7 @@ Canonical SQL is in:
 - `users`
   - auth + role (`user`/`admin`)
 - `categories`
-  - category dictionary
+  - category dictionary (`id`, `name`, `slug`, `name_i18n`)
 - `books`
   - book entity + metadata + ownership (`user_id`)
 - `user_books`
@@ -172,6 +173,32 @@ Canonical SQL is in:
 - `user_books.user_id -> users.id` (CASCADE)
 - `user_books.book_id -> books.id` (CASCADE)
 - Unique logical pair: `(user_id, book_id)` in `user_books`
+
+### Categories: six languages vs database columns
+
+The UI supports six languages (`en`, `hy`, `ru`, `fr`, `de`, `it`). Category labels are **not** stored as six separate MySQL columns. They are stored in **one** column, `categories.name_i18n`, as **UTF-8 JSON** with exactly these keys:
+
+| JSON key | Meaning |
+|----------|---------|
+| `en` | English label |
+| `hy` | Armenian |
+| `ru` | Russian |
+| `fr` | French |
+| `de` | German |
+| `it` | Italian |
+
+When an admin saves **Կատեգորիաներ / Categories**, the form posts `name_i18n[en]`, `name_i18n[hy]`, … PHP builds one JSON string and executes `UPDATE categories SET name = ?, slug = ?, name_i18n = ? WHERE id = ?`. The `name` column stays the canonical English string for uniqueness checks and sorting; the JSON holds per-language display strings.
+
+At runtime, `includes/category_i18n.php` (`sskCategoryDisplayName`, `sskBookCategoryDisplay`) chooses the string for the active session language and falls back to English (then `name`) when a translation is empty.
+
+**Bulk fill** the built-in genre names (Business, Fantasy, History, Mystery, Romance, Science Fiction and common slug variants) in all six languages:
+
+```bash
+cd "Booking center(SSK)"
+php scripts/backfill-category-translations.php
+```
+
+The script only updates rows it recognizes (by `slug` or English `name`); it prints `Skip` lines for anything else so you can add those manually in the admin UI.
 
 ---
 
@@ -201,6 +228,15 @@ SEED_ADMIN_EMAIL="admin@example.com" \
 SEED_ADMIN_PASSWORD="change-this-password" \
 php scripts/seed.php
 ```
+
+### Optional: six-language labels for default genres
+After categories exist in MySQL (from normal use or imports), you can push curated translations into `name_i18n`:
+
+```bash
+php scripts/backfill-category-translations.php
+```
+
+Requires the same `.env` / DB credentials as the web app (`includes/db.php`).
 
 ### Run app
 ```bash
