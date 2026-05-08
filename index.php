@@ -29,21 +29,23 @@ $pageScripts = ['assets/js/pages/index.js'];
 ?>
 <?php include 'includes/header.php'; ?>
 
-<main class="container">
-    <div class="page-header">
+<main class="container catalog-page">
+    <header class="catalog-hero">
         <div class="page-title">
             <h1><?= htmlspecialchars(t('index.title')) ?></h1>
             <p><?= htmlspecialchars(t('index.subtitle')) ?></p>
         </div>
-        
-        <div class="search-container">
-            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="searchInput" name="q" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="<?= htmlspecialchars(t('index.search_placeholder')) ?>">
-        </div>
-    </div>
+    </header>
 
-    <!-- CATEGORY FILTERS -->
-    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px;" id="categoryFilters">
+    <section class="catalog-search-panel" aria-labelledby="catalogSearchLabel">
+        <label id="catalogSearchLabel" class="catalog-search-label" for="searchInput"><?= htmlspecialchars(t('index.search_label')) ?></label>
+        <div class="search-container catalog-search-field">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="search" id="searchInput" name="q" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="<?= htmlspecialchars(t('index.search_placeholder')) ?>">
+        </div>
+    </section>
+
+    <div class="category-filters" id="categoryFilters">
         <button class="btn btn-primary cat-filter" data-category="all" style="border-radius: 99px;"><?= htmlspecialchars(t('index.all_books')) ?></button>
         <?php foreach($categories as $cat): ?>
             <button class="btn btn-outline cat-filter" data-category="<?= htmlspecialchars(sskCategorySlugForFilter($cat)) ?>" style="border-radius: 99px; font-size: 13px;">

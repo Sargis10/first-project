@@ -30,6 +30,7 @@ return [
     'index.title' => 'La mia biblioteca',
     'index.subtitle' => 'Esplora l’intero catalogo della biblioteca.',
     'index.search_placeholder' => 'Cerca libri…',
+    'index.search_label' => 'Cerca nel catalogo',
     'index.all_books' => 'Tutti i libri',
     'index.no_books_title' => 'Nessun libro trovato',
     'index.no_books_subtitle' => 'Inizia la tua collezione aggiungendo il primo libro.',

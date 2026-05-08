@@ -289,12 +289,72 @@ main {
     margin-bottom: 40px;
 }
 
-@media (min-width: 640px) {
-    .page-header {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: flex-end;
-    }
+/* --- CATALOG (index): title block + full-width search (common pattern: hero, then search bar, then filters) --- */
+.catalog-page .catalog-hero {
+    margin-bottom: 1.5rem;
+}
+
+.catalog-search-panel {
+    margin-bottom: 1.75rem;
+}
+
+.catalog-search-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted-color);
+    margin-bottom: 10px;
+}
+
+.catalog-page .catalog-search-field {
+    position: relative;
+    width: 100%;
+    max-width: none;
+}
+
+.catalog-page .catalog-search-field input {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(90, 90, 64, 0.14);
+    background: var(--bg-elevated);
+    padding: 14px 18px 14px 48px;
+    font-size: 15px;
+    line-height: 1.35;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    font-family: var(--font-sans);
+    box-shadow:
+        0 1px 2px rgba(26, 26, 26, 0.04),
+        0 8px 28px rgba(90, 90, 64, 0.07);
+}
+
+.catalog-page .catalog-search-field input::placeholder {
+    color: rgba(113, 113, 113, 0.85);
+}
+
+.catalog-page .catalog-search-field input:hover {
+    border-color: rgba(90, 90, 64, 0.22);
+}
+
+.catalog-page .catalog-search-field input:focus {
+    border-color: var(--accent-color);
+    box-shadow:
+        0 0 0 3px rgba(90, 90, 64, 0.12),
+        0 10px 32px rgba(90, 90, 64, 0.1);
+}
+
+.catalog-page .catalog-search-field .search-icon {
+    left: 16px;
+    opacity: 0.85;
+}
+
+.category-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 32px;
 }
 
 .page-title h1 {
