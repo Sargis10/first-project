@@ -6,7 +6,7 @@ Core Connection
 Database name: `ssk`
 Host: `127.0.0.1`
 User: `ssk_app`
-Password: `ssk_app_2026`
+Password: provided from environment variable `DB_PASSWORD` (not stored in repository)
 Charset: `utf8mb4`
 
 

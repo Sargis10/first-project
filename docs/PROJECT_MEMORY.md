@@ -35,7 +35,7 @@ This file is the persistent working memory for this project and should be update
 - Database name: `ssk`
 - Host: `127.0.0.1`
 - App user: `ssk_app`
-- App password in code: `ssk_app_2026`
+- DB secret source: environment variable `DB_PASSWORD` from local `.env` (not committed)
 - `includes/db.php` auto-creates DB/tables and applies basic column migrations.
 
 ## Startup Dependencies

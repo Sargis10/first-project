@@ -11,6 +11,7 @@ $error = '';
 
 // Handle Updates
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verifyCsrfTokenOrFail();
     try {
         $pdo->beginTransaction();
         foreach ($_POST['settings'] as $key => $value) {
@@ -21,7 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $success = "Site settings updated successfully!";
     } catch (PDOException $e) {
         $pdo->rollBack();
-        $error = "Update failed: " . $e->getMessage();
+        error_log('Site settings update error: ' . $e->getMessage());
+        $error = "Update failed. Please try again.";
     }
 }
 
@@ -44,6 +46,7 @@ $settings = $pdo->query("SELECT * FROM site_settings")->fetchAll(PDO::FETCH_KEY_
     <?php endif; ?>
 
     <form method="POST" style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05);">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
         <div style="display: flex; flex-direction: column; gap: 32px;">
             
             <div class="form-group">

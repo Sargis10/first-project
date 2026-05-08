@@ -38,6 +38,7 @@ $pageStyles = ['assets/css/pages/book-details.css'];
 
 // Handle Status Update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    verifyCsrfTokenOrFail();
     if ($_POST['action'] === 'update_status') {
         $new_status = $_POST['status'] ?? 'none';
         if ($new_status === 'none') {
@@ -95,6 +96,7 @@ function simpleMarkdown($text) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="16 3 21 8 8 21 3 21 3 16 16 3"></polygon></svg>
             </a>
             <form method="POST" onsubmit="return confirm('Are you sure you want to delete this book?');" style="margin: 0;">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                 <input type="hidden" name="action" value="delete">
                 <button type="submit" class="btn btn-ghost btn-danger" style="padding: 8px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
@@ -128,6 +130,7 @@ function simpleMarkdown($text) {
 
                 <div style="display: flex; align-items: center; gap: 16px;">
                     <form method="POST" style="margin: 0; flex: 1;">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                         <input type="hidden" name="action" value="update_status">
                         <select name="status" onchange="this.form.submit()" class="form-input" style="padding: 10px 16px; font-weight: 600; cursor: pointer; border: 1px solid var(--accent-color); color: var(--accent-color); background: white; border-radius: 8px;">
                             <option value="none" <?= $current_status == 'none' ? 'selected' : '' ?>>+ Add to My Reading List</option>
@@ -138,6 +141,7 @@ function simpleMarkdown($text) {
                     </form>
                     
                     <form method="POST" style="margin: 0;">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                         <input type="hidden" name="action" value="toggle_favorite">
                         <button type="submit" style="background: none; border: none; cursor: pointer; padding: 8px; color: <?= $is_favorite ? '#e11d48' : '#cbd5e1' ?>; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
                             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="<?= $is_favorite ? 'currentColor' : 'none' ?>" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

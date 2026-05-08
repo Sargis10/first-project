@@ -9,6 +9,7 @@ if (isLoggedIn()) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verifyCsrfTokenOrFail();
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
 
@@ -50,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
             <div class="form-group">
                 <label>Email Address</label>
                 <input type="email" name="email" class="form-input" required>

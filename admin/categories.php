@@ -11,6 +11,7 @@ $success = '';
 
 // Handle Add Category
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    verifyCsrfTokenOrFail();
     if ($_POST['action'] === 'add') {
         $name = trim($_POST['name'] ?? '');
         if (empty($name)) {
@@ -54,6 +55,7 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
     <!-- ADD CATEGORY FORM -->
     <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); margin-bottom: 40px;">
         <form method="POST" style="display: flex; gap: 12px; align-items: flex-end;">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
             <input type="hidden" name="action" value="add">
             <div style="flex: 1;">
                 <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px;">New Category Name</label>
@@ -86,6 +88,7 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
                     <td style="padding: 16px 24px; font-weight: 500;"><?= htmlspecialchars($cat['name']) ?></td>
                     <td style="padding: 16px 24px; text-align: right;">
                         <form method="POST" style="margin: 0;" onsubmit="return confirm('Delete this category?');">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="id" value="<?= $cat['id'] ?>">
                             <button type="submit" class="btn btn-ghost btn-danger" style="padding: 6px 12px; font-size: 12px;">Delete</button>

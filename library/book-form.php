@@ -59,6 +59,7 @@ if ($book_id) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verifyCsrfTokenOrFail();
     $title = trim($_POST['title'] ?? '');
     $author = trim($_POST['author'] ?? '');
     $description = trim($_POST['description'] ?? '');
@@ -141,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: 1fr; gap: 40px;">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
         
         <div style="display: grid; grid-template-columns: 1fr; gap: 40px;">
             <div style="display: flex; flex-direction: column; gap: 16px;">

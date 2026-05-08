@@ -1,13 +1,80 @@
 <?php
-session_start();
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    session_name('ssk_session');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => $isHttps,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+    session_start();
+}
 
-$host = '127.0.0.1';
-$db = 'ssk';
-$user = 'ssk_app';
+function loadEnvFile($filePath) {
+    if (!is_readable($filePath)) {
+        return;
+    }
+    $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($lines === false) {
+        return;
+    }
+    foreach ($lines as $line) {
+        $trimmed = trim($line);
+        if ($trimmed === '' || str_starts_with($trimmed, '#') || !str_contains($trimmed, '=')) {
+            continue;
+        }
+        [$key, $value] = explode('=', $trimmed, 2);
+        $key = trim($key);
+        $value = trim($value);
+        if ($value !== '' && (($value[0] === '"' && str_ends_with($value, '"')) || ($value[0] === "'" && str_ends_with($value, "'")))) {
+            $value = substr($value, 1, -1);
+        }
+        if ($key !== '' && getenv($key) === false) {
+            putenv($key . '=' . $value);
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
+        }
+    }
+}
+
+function envValue($key, $default = null) {
+    $value = getenv($key);
+    if ($value === false || $value === '') {
+        return $default;
+    }
+    return $value;
+}
+
+loadEnvFile(__DIR__ . '/../.env');
+
+$host = envValue('DB_HOST', '127.0.0.1');
+$db = envValue('DB_NAME', 'ssk');
+$user = envValue('DB_USER', 'ssk_app');
 $charset = 'utf8mb4';
 
-// App DB user password fallback list.
-$passwordCandidates = ['ssk_app_2026'];
+$passwordCandidates = [];
+$mainPassword = envValue('DB_PASSWORD', null);
+if ($mainPassword !== null) {
+    $passwordCandidates[] = $mainPassword;
+}
+$fallbackCsv = envValue('DB_PASSWORD_FALLBACKS', '');
+if ($fallbackCsv !== '') {
+    foreach (explode(',', $fallbackCsv) as $fallbackPassword) {
+        $fallbackPassword = trim($fallbackPassword);
+        if ($fallbackPassword !== '') {
+            $passwordCandidates[] = $fallbackPassword;
+        }
+    }
+}
+if (count($passwordCandidates) === 0) {
+    throw new RuntimeException('DB_PASSWORD is not configured. Add it in environment or .env file.');
+}
+
 $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -123,7 +190,6 @@ try {
     // Safety migrations for older DB snapshots.
     if (!columnExists($pdo, $db, 'users', 'role')) {
         $pdo->exec("ALTER TABLE users ADD COLUMN role VARCHAR(50) DEFAULT 'user'");
-        $pdo->exec("UPDATE users SET role = 'admin' WHERE id IN (1, 2)");
     }
 
     $bookColumns = [
@@ -143,13 +209,30 @@ try {
             $pdo->exec($sql);
         }
     }
-} catch (PDOException $e) {
-    die("Database Connection Error: " . $e->getMessage());
+} catch (Throwable $e) {
+    error_log('Database initialization error: ' . $e->getMessage());
+    http_response_code(500);
+    die("Database initialization failed. Contact administrator.");
 }
 
 // Helper to check if logged in
 function isLoggedIn() {
     return isset($_SESSION['user_id']);
+}
+
+function csrfToken() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function verifyCsrfTokenOrFail() {
+    $token = $_POST['csrf_token'] ?? '';
+    if (!is_string($token) || !hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+        http_response_code(403);
+        die('Invalid security token. Please refresh and try again.');
+    }
 }
 
 // Helper to get current user ID

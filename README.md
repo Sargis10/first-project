@@ -186,19 +186,17 @@ sudo mysql < database/database_schema.sql
 
 ### App DB user (example)
 ```sql
-CREATE USER IF NOT EXISTS 'ssk_app'@'127.0.0.1' IDENTIFIED BY 'ssk_app_2026';
+CREATE USER IF NOT EXISTS 'ssk_app'@'127.0.0.1' IDENTIFIED BY '<strong-password>';
 GRANT ALL PRIVILEGES ON ssk.* TO 'ssk_app'@'127.0.0.1';
 FLUSH PRIVILEGES;
 ```
 
-### Seed admin
+### Seed admin (secure mode)
 ```bash
+SEED_ADMIN_EMAIL="admin@example.com" \
+SEED_ADMIN_PASSWORD="change-this-password" \
 php scripts/seed.php
 ```
-
-Default seeded admin credentials:
-- Email: `admin@libris.com`
-- Password: `password123`
 
 ### Run app
 ```bash
@@ -212,14 +210,15 @@ Open:
 
 ## 7) Configuration Notes
 
-Current DB credentials in `includes/db.php`:
-- Host: `127.0.0.1`
-- DB: `ssk`
-- User: `ssk_app`
-- Password candidate: `ssk_app_2026`
+Runtime DB configuration comes from environment variables (`.env` for local dev):
+- `DB_HOST`
+- `DB_NAME`
+- `DB_USER`
+- `DB_PASSWORD`
+- Optional: `DB_PASSWORD_FALLBACKS` (comma-separated)
 
 ### Recommendation
-Move credentials to environment variables before production use.
+Keep `.env` out of git and rotate DB credentials regularly.
 
 ---
 
@@ -230,12 +229,12 @@ Move credentials to environment variables before production use.
 - Password verification via `password_verify()`
 - Prepared statements for queries
 - Basic role checks using session role
+- Session cookie hardening (`HttpOnly`, `SameSite`, strict mode)
+- CSRF protection for state-changing forms
 
 ### Gaps to improve
-- No CSRF tokens on forms
 - No brute-force/rate-limit protection on auth
 - No centralized input validation layer
-- Credentials currently in code
 - Inline styles/scripts still exist in some templates
 
 ---
