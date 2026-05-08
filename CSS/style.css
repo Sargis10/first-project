@@ -1,0 +1,318 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+    --bg-color: #FDFCFB;
+    --ink-color: #1A1A1A;
+    --muted-color: #717171;
+    --accent-color: #5A5A40;
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-serif: "Playfair Display", serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--ink-color);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+}
+
+.container {
+    max-width: 1024px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* --- NAVBAR (Glass Effect) --- */
+header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 16px 0;
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-serif);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink-color);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+}
+
+.menu {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* --- BUTTONS --- */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 16px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background-color: var(--ink-color);
+    color: var(--bg-color);
+}
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-outline {
+    border-color: var(--ink-color);
+    color: var(--ink-color);
+    background: transparent;
+}
+.btn-outline:hover {
+    background-color: var(--ink-color);
+    color: var(--bg-color);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--ink-color);
+    padding: 8px 12px;
+}
+.btn-ghost:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.btn-danger {
+    color: #ef4444;
+}
+.btn-danger:hover {
+    background-color: #fef2f2;
+}
+
+/* --- PAGE LAYOUT --- */
+main {
+    flex-grow: 1;
+    padding: 40px 0;
+}
+
+.page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 40px;
+}
+
+@media (min-width: 640px) {
+    .page-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+}
+
+.page-title h1 {
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+}
+
+.page-title p {
+    color: var(--muted-color);
+    font-size: 18px;
+}
+
+/* --- INPUTS & FORMS --- */
+.form-group {
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted-color);
+}
+
+.form-input, .form-textarea {
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid rgba(26, 26, 26, 0.2);
+    padding: 12px 16px;
+    font-size: 14px;
+    font-family: var(--font-sans);
+    outline: none;
+    background: transparent;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus, .form-textarea:focus {
+    border-color: var(--ink-color);
+}
+
+.form-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.error-text {
+    color: #ef4444;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+/* --- GRID & CARDS --- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 24px;
+    row-gap: 40px;
+}
+
+@media (min-width: 768px) {
+    .grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.card-image-wrap {
+    aspect-ratio: 2 / 3;
+    background-color: #e5e5e5;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-link:hover .card-image-wrap {
+    transform: translateY(-8px);
+}
+
+.card-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-title {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+.card-link:hover .card-title {
+    text-decoration: underline;
+}
+
+.card-subtitle {
+    font-size: 14px;
+    color: var(--muted-color);
+}
+
+/* --- AUTH PAGE --- */
+.auth-wrapper {
+    display: flex;
+    min-height: calc(100vh - 80px);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.auth-form {
+    width: 100%;
+    max-width: 400px;
+}
+
+/* --- SEARCH CONTAINER --- */
+.search-container {
+    position: relative;
+    width: 100%;
+    max-width: 256px;
+}
+
+.search-container input {
+    width: 100%;
+    border-radius: 9999px;
+    border: 1px solid rgba(26, 26, 26, 0.1);
+    background-color: #fff;
+    padding: 10px 16px 10px 40px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: var(--font-sans);
+}
+
+.search-container input:focus {
+    border-color: rgba(26, 26, 26, 0.3);
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted-color);
+}
+
+/* --- FOOTER --- */
+footer {
+    padding: 40px 0;
+    text-align: center;
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+footer p {
+    color: var(--muted-color);
+    font-size: 14px;
+}

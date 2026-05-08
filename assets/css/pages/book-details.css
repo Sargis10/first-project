@@ -1,0 +1,7 @@
+@media (min-width: 768px) {
+    .book-details-grid {
+        display: grid;
+        grid-template-columns: 4fr 8fr;
+        gap: 48px;
+    }
+}

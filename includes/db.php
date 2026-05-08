@@ -1,0 +1,164 @@
+<?php
+session_start();
+
+$host = '127.0.0.1';
+$db = 'ssk';
+$user = 'ssk_app';
+$charset = 'utf8mb4';
+
+// App DB user password fallback list.
+$passwordCandidates = ['ssk_app_2026'];
+$options = [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES => false,
+];
+
+function connectPdo($dsn, $user, $passwordCandidates, $options) {
+    $lastException = null;
+    foreach ($passwordCandidates as $pass) {
+        try {
+            return new PDO($dsn, $user, $pass, $options);
+        } catch (PDOException $e) {
+            $lastException = $e;
+        }
+    }
+    throw $lastException;
+}
+
+function tableExists($pdo, $db, $table) {
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE table_schema = ? AND table_name = ?
+    ");
+    $stmt->execute([$db, $table]);
+    return (int)$stmt->fetchColumn() > 0;
+}
+
+function columnExists($pdo, $db, $table, $column) {
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE table_schema = ? AND table_name = ? AND column_name = ?
+    ");
+    $stmt->execute([$db, $table, $column]);
+    return (int)$stmt->fetchColumn() > 0;
+}
+
+try {
+    try {
+        $pdo = connectPdo("mysql:host=$host;dbname=$db;charset=$charset", $user, $passwordCandidates, $options);
+    } catch (PDOException $e) {
+        // If DB does not exist yet, connect to server and create it.
+        $serverPdo = connectPdo("mysql:host=$host;charset=$charset", $user, $passwordCandidates, $options);
+        $serverPdo->exec("CREATE DATABASE IF NOT EXISTS `$db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        $pdo = connectPdo("mysql:host=$host;dbname=$db;charset=$charset", $user, $passwordCandidates, $options);
+    }
+
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            role VARCHAR(50) DEFAULT 'user',
+            email VARCHAR(255) UNIQUE NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS categories (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL UNIQUE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS books (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            author VARCHAR(255) NOT NULL,
+            description TEXT NULL,
+            cover_url VARCHAR(255) NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            category_id INT NULL,
+            isbn VARCHAR(20) NULL,
+            publisher VARCHAR(255) NULL,
+            publish_year INT NULL,
+            language VARCHAR(100) DEFAULT 'English',
+            page_count INT NULL,
+            author_bio TEXT NULL,
+            format VARCHAR(100) NULL,
+            edition VARCHAR(100) NULL,
+            CONSTRAINT fk_books_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            CONSTRAINT fk_books_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS user_books (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            book_id INT NOT NULL,
+            status ENUM('want_to_read', 'reading', 'read') DEFAULT 'want_to_read',
+            is_favorite TINYINT(1) DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_user_book (user_id, book_id),
+            CONSTRAINT fk_user_books_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            CONSTRAINT fk_user_books_book FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS site_settings (
+            setting_key VARCHAR(255) PRIMARY KEY,
+            setting_value TEXT NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
+    // Safety migrations for older DB snapshots.
+    if (!columnExists($pdo, $db, 'users', 'role')) {
+        $pdo->exec("ALTER TABLE users ADD COLUMN role VARCHAR(50) DEFAULT 'user'");
+        $pdo->exec("UPDATE users SET role = 'admin' WHERE id IN (1, 2)");
+    }
+
+    $bookColumns = [
+        'category_id' => "ALTER TABLE books ADD COLUMN category_id INT NULL",
+        'isbn' => "ALTER TABLE books ADD COLUMN isbn VARCHAR(20) NULL",
+        'publisher' => "ALTER TABLE books ADD COLUMN publisher VARCHAR(255) NULL",
+        'publish_year' => "ALTER TABLE books ADD COLUMN publish_year INT NULL",
+        'language' => "ALTER TABLE books ADD COLUMN language VARCHAR(100) DEFAULT 'English'",
+        'page_count' => "ALTER TABLE books ADD COLUMN page_count INT NULL",
+        'author_bio' => "ALTER TABLE books ADD COLUMN author_bio TEXT NULL",
+        'format' => "ALTER TABLE books ADD COLUMN format VARCHAR(100) NULL",
+        'edition' => "ALTER TABLE books ADD COLUMN edition VARCHAR(100) NULL",
+    ];
+
+    foreach ($bookColumns as $column => $sql) {
+        if (tableExists($pdo, $db, 'books') && !columnExists($pdo, $db, 'books', $column)) {
+            $pdo->exec($sql);
+        }
+    }
+} catch (PDOException $e) {
+    die("Database Connection Error: " . $e->getMessage());
+}
+
+// Helper to check if logged in
+function isLoggedIn() {
+    return isset($_SESSION['user_id']);
+}
+
+// Helper to get current user ID
+function currentUserId() {
+    return $_SESSION['user_id'] ?? null;
+}
+
+// Helper to check if current user is admin
+function isAdmin() {
+    return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+}
+?>
