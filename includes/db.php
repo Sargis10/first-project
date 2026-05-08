@@ -230,9 +230,11 @@ try {
 
         foreach ($pending as $c) {
             $name = (string)$c['name'];
+            // Only English in JSON; other locales stay empty so the UI can fall back to English
+            // until an admin adds real translations (see sskCategoryLabelFromParts).
             $names = [];
             foreach (SSK_LANGUAGES as $lc) {
-                $names[$lc] = $name;
+                $names[$lc] = ($lc === 'en') ? $name : '';
             }
             $json = sskCategoryNamesJson($names);
             $baseSlug = sskSlugifyCategory($name);
@@ -255,6 +257,59 @@ try {
             }
         } catch (Throwable $e) {
             // Older snapshots may still have duplicate slugs; app layer enforces uniqueness on write.
+        }
+
+        // One-time cleanup: older app versions copied the same label into every language key, so
+        // Armenian (etc.) never fell back — sskCategoryLabelFromParts returned the English word from map['hy'].
+        // If every filled language has the identical string, keep it only under `en` and clear the rest.
+        $normKey = 'ssk_category_i18n_uniform_cleared_v1';
+        $normChk = $pdo->prepare('SELECT 1 FROM site_settings WHERE setting_key = ? LIMIT 1');
+        $normChk->execute([$normKey]);
+        if (!$normChk->fetchColumn()) {
+            $allCats = $pdo->query('SELECT id, name, name_i18n FROM categories')->fetchAll(PDO::FETCH_ASSOC);
+            $pdo->beginTransaction();
+            try {
+                foreach ($allCats as $row) {
+                    $map = sskCategoryNamesDecode($row['name_i18n'] ?? null);
+                    foreach (SSK_LANGUAGES as $lc) {
+                        if (!array_key_exists($lc, $map)) {
+                            $map[$lc] = '';
+                        }
+                    }
+                    $nonEmpty = [];
+                    foreach (SSK_LANGUAGES as $lc) {
+                        $t = trim((string)($map[$lc] ?? ''));
+                        if ($t !== '') {
+                            $nonEmpty[$lc] = $t;
+                        }
+                    }
+                    if (count($nonEmpty) < 2) {
+                        continue;
+                    }
+                    $uniqueVals = array_values(array_unique(array_values($nonEmpty)));
+                    if (count($uniqueVals) !== 1) {
+                        continue;
+                    }
+                    $canonical = trim((string)($row['name']));
+                    if ($canonical === '') {
+                        $canonical = $uniqueVals[0];
+                    }
+                    $newNames = [];
+                    foreach (SSK_LANGUAGES as $lc) {
+                        $newNames[$lc] = ($lc === 'en') ? $canonical : '';
+                    }
+                    $updNorm = $pdo->prepare('UPDATE categories SET name_i18n = ? WHERE id = ?');
+                    $updNorm->execute([sskCategoryNamesJson($newNames), (int)$row['id']]);
+                }
+                $insNorm = $pdo->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)');
+                $insNorm->execute([$normKey, '1']);
+                $pdo->commit();
+            } catch (Throwable $eNorm) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                error_log('Category i18n normalization: ' . $eNorm->getMessage());
+            }
         }
     }
 } catch (Throwable $e) {
