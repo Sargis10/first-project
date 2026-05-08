@@ -4,6 +4,15 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/i18n.php';
 
+/** Lowercase for slugs and filters; works without mbstring (Hetzner default missed php-mbstring once). */
+function sskLower(string $value): string
+{
+    if (function_exists('mb_strtolower')) {
+        return mb_strtolower($value, 'UTF-8');
+    }
+    return strtolower($value);
+}
+
 function sskSlugifyCategory(string $label): string
 {
     $label = trim($label);
@@ -106,7 +115,7 @@ function sskCategorySlugForFilter(array $cat): string
 {
     $slug = isset($cat['slug']) ? trim((string)$cat['slug']) : '';
     if ($slug !== '') {
-        return mb_strtolower($slug, 'UTF-8');
+        return sskLower($slug);
     }
     $fallback = sskSlugifyCategory((string)($cat['name'] ?? ''));
     return $fallback !== '' ? $fallback : 'uncategorized';

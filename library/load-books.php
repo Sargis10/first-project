@@ -60,7 +60,7 @@ foreach ($rows as $book) {
     $title = strtolower((string)($book['title'] ?? ''));
     $author = strtolower((string)($book['author'] ?? ''));
     $slug = isset($book['category_slug']) && $book['category_slug'] !== ''
-        ? mb_strtolower((string)$book['category_slug'], 'UTF-8')
+        ? sskLower((string)$book['category_slug'])
         : 'uncategorized';
 
     $html .= '

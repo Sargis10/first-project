@@ -41,6 +41,7 @@ This file is the persistent working memory for this project and should be update
 
 ## Startup Dependencies
 - PHP runtime with MySQL extension (`php`, `php-mysql`)
+- **Strongly recommended:** `php-mbstring` (UTF-8 helpers). Without it, the app uses ASCII `strtolower` fallbacks for slugs; install on servers: e.g. `apt install php8.3-mbstring`.
 - Apache or built-in PHP server
 - MySQL/MariaDB server
 
@@ -71,6 +72,8 @@ This file is the persistent working memory for this project and should be update
 - `CSS/style.css`: `select.book-category-select[size]` sizing.
 
 **Deploy routine:** Push `main` to both GitHub remotes (`origin` Samvel10, `sargis` Sargis10); on Hetzner, `git pull` only under `/opt/libery-from-practic`, then `systemctl restart ssk-app`.
+
+**Correction (2026-05-09):** The catalog did **not** delete books or categories. MySQL still held all rows. The UI broke with **PHP Fatal: `mb_strtolower()` undefined** because `php-mbstring` was not installed on the Hetzner image. Fix: `includes/category_i18n.php` adds `sskLower()` fallback; server should install `php8.3-mbstring` for full Unicode support.
 
 ## Next planned step
 - Keep `main` in sync on both GitHub remotes and redeploy the Hetzner unit after material changes.
