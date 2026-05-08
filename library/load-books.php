@@ -11,6 +11,8 @@ if (!isLoggedIn()) {
 
 $limit = (int)($_GET['limit'] ?? 20);
 $offset = (int)($_GET['offset'] ?? 0);
+$category = trim((string)($_GET['category'] ?? 'all'));
+$query = trim((string)($_GET['q'] ?? ''));
 
 // Hard clamp to keep the page fast and predictable.
 $limit = max(1, min($limit, 20));
@@ -18,13 +20,30 @@ $offset = max(0, $offset);
 
 $fetchLimit = $limit + 1; // one extra to detect "has more"
 
-$stmt = $pdo->prepare("
+$sql = "
     SELECT books.*, categories.name as category_name
     FROM books
     LEFT JOIN categories ON books.category_id = categories.id
-    ORDER BY created_at DESC
-    LIMIT :limit OFFSET :offset
-");
+    WHERE 1=1
+";
+$params = [];
+
+if ($category !== '' && strtolower($category) !== 'all') {
+    $sql .= " AND LOWER(COALESCE(categories.name, 'uncategorized')) = :category";
+    $params[':category'] = strtolower($category);
+}
+
+if ($query !== '') {
+    $sql .= " AND (LOWER(books.title) LIKE :q OR LOWER(books.author) LIKE :q)";
+    $params[':q'] = '%' . strtolower($query) . '%';
+}
+
+$sql .= " ORDER BY books.created_at DESC LIMIT :limit OFFSET :offset";
+
+$stmt = $pdo->prepare($sql);
+foreach ($params as $key => $value) {
+    $stmt->bindValue($key, $value, PDO::PARAM_STR);
+}
 $stmt->bindValue(':limit', $fetchLimit, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();

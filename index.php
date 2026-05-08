@@ -52,7 +52,7 @@ $pageScripts = ['assets/js/pages/index.js'];
     </div>
 
     <?php if (count($books) > 0): ?>
-        <div class="grid" id="booksGrid" data-offset="<?= (int)$offset ?>" data-limit="<?= (int)$limit ?>">
+        <div class="grid" id="booksGrid" data-offset="<?= (int)count($books) ?>" data-limit="<?= (int)$limit ?>">
             <?php foreach ($books as $book): ?>
                 <div class="card-item" 
                      data-title="<?= htmlspecialchars(strtolower($book['title'])) ?>" 
@@ -83,6 +83,9 @@ $pageScripts = ['assets/js/pages/index.js'];
                     </form>
                 </div>
             <?php endforeach; ?>
+        </div>
+        <div id="dynamicNoResults" style="display:none; text-align:center; padding:64px 0; color:var(--muted-color);">
+            No books found for this filter.
         </div>
     <?php else: ?>
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 0; text-align: center; gap: 16px;">

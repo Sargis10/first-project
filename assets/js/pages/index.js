@@ -1,69 +1,43 @@
-const searchInput = document.getElementById('searchInput');
-const categoryButtons = document.querySelectorAll('.cat-filter');
-
-let currentSearch = '';
-let currentCategory = 'all';
-
-let items = [];
-function refreshItems() {
-    items = document.querySelectorAll('.card-item');
-}
-
-function filterBooks() {
-    refreshItems();
-    items.forEach((item) => {
-        const title = item.getAttribute('data-title');
-        const author = item.getAttribute('data-author');
-        const category = item.getAttribute('data-category');
-
-        const matchesSearch = title.includes(currentSearch) || author.includes(currentSearch);
-        const matchesCategory = currentCategory === 'all' || category === currentCategory;
-
-        item.style.display = matchesSearch && matchesCategory ? 'block' : 'none';
-    });
-}
-
-if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-        currentSearch = e.target.value.toLowerCase();
-        filterBooks();
-    });
-}
-
-categoryButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-        categoryButtons.forEach((b) => {
-            b.classList.remove('btn-primary');
-            b.classList.add('btn-outline');
-        });
-        btn.classList.remove('btn-outline');
-        btn.classList.add('btn-primary');
-
-        currentCategory = btn.getAttribute('data-category');
-        filterBooks();
-    });
-});
-
-// --- Lazy load / load-more (20 at a time) ---
 const booksGrid = document.getElementById('booksGrid');
 const sentinel = document.getElementById('loadMoreSentinel');
 const loadMoreBtn = document.getElementById('loadMoreBtn');
+const searchInput = document.getElementById('searchInput');
+const categoryButtons = document.querySelectorAll('.cat-filter');
+const dynamicNoResults = document.getElementById('dynamicNoResults');
 
 let loading = false;
 let hasMore = true;
 let offset = 0;
 let limit = 20;
+let currentSearch = '';
+let currentCategory = 'all';
+let searchDebounce = null;
 
 if (booksGrid) {
-    offset = parseInt(booksGrid.dataset.offset || '0', 10);
+    offset = parseInt(booksGrid.dataset.offset || '20', 10);
     limit = parseInt(booksGrid.dataset.limit || '20', 10);
+}
+
+function updateNoResultsVisibility() {
+    if (!dynamicNoResults || !booksGrid) return;
+    dynamicNoResults.style.display = booksGrid.children.length === 0 ? 'block' : 'none';
+}
+
+function buildUrl() {
+    const params = new URLSearchParams({
+        offset: String(offset),
+        limit: String(limit),
+        category: currentCategory,
+        q: currentSearch,
+    });
+    return `/library/load-books.php?${params.toString()}`;
 }
 
 async function loadMoreBooks() {
     if (!booksGrid || loading || !hasMore) return;
     loading = true;
 
-    const url = `/library/load-books.php?offset=${encodeURIComponent(offset)}&limit=${encodeURIComponent(limit)}`;
+    const url = buildUrl();
 
     try {
         if (loadMoreBtn) loadMoreBtn.disabled = true;
@@ -82,8 +56,7 @@ async function loadMoreBooks() {
         } else {
             offset += limit;
         }
-
-        filterBooks();
+        updateNoResultsVisibility();
 
         if (!hasMore) {
             if (sentinel) sentinel.style.display = 'none';
@@ -101,6 +74,42 @@ async function loadMoreBooks() {
     }
 }
 
+async function resetAndReloadBooks() {
+    if (!booksGrid) return;
+    offset = 0;
+    hasMore = true;
+    booksGrid.innerHTML = '';
+    if (sentinel) sentinel.style.display = '';
+    if (loadMoreBtn) {
+        loadMoreBtn.style.display = '';
+        loadMoreBtn.disabled = false;
+    }
+    await loadMoreBooks();
+}
+
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        currentSearch = (e.target.value || '').trim().toLowerCase();
+        if (searchDebounce) clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => {
+            resetAndReloadBooks();
+        }, 220);
+    });
+}
+
+categoryButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+        categoryButtons.forEach((b) => {
+            b.classList.remove('btn-primary');
+            b.classList.add('btn-outline');
+        });
+        btn.classList.remove('btn-outline');
+        btn.classList.add('btn-primary');
+        currentCategory = btn.getAttribute('data-category') || 'all';
+        resetAndReloadBooks();
+    });
+});
+
 if (loadMoreBtn) {
     loadMoreBtn.addEventListener('click', loadMoreBooks);
 }
@@ -113,7 +122,4 @@ if (sentinel && 'IntersectionObserver' in window) {
     }, { rootMargin: '600px 0px' });
     io.observe(sentinel);
 }
-
-// Initial filter state.
-refreshItems();
-filterBooks();
+updateNoResultsVisibility();
