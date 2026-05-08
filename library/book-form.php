@@ -98,9 +98,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $category_id = $_POST['category_id'] ?? null;
     $isbn = trim($_POST['isbn'] ?? '');
     $publisher = trim($_POST['publisher'] ?? '');
-    $publish_year = $_POST['publish_year'] ?? null;
+    $publishYearRaw = $_POST['publish_year'] ?? null;
+    $publish_year = ($publishYearRaw === '' || $publishYearRaw === null)
+        ? null
+        : (filter_var($publishYearRaw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]) !== false
+            ? (int)$publishYearRaw
+            : null);
+
     $language = trim($_POST['language'] ?? 'English');
-    $page_count = $_POST['page_count'] ?? null;
+
+    $pageCountRaw = $_POST['page_count'] ?? null;
+    $page_count = ($pageCountRaw === '' || $pageCountRaw === null)
+        ? null
+        : (filter_var($pageCountRaw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]) !== false
+            ? (int)$pageCountRaw
+            : null);
     $author_bio = trim($_POST['author_bio'] ?? '');
     $format = trim($_POST['format'] ?? '');
     $edition = trim($_POST['edition'] ?? '');
