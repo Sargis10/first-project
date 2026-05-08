@@ -1,7 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 
 :root {
-    --bg-color: #FDFCFB;
+    /* Warm paper base — editorial / reading-room palette (not flat white) */
+    --bg-color: #f4f1ea;
+    --bg-paper-mid: #ebe6dc;
+    --bg-elevated: rgba(255, 254, 250, 0.92);
     --ink-color: #1A1A1A;
     --muted-color: #717171;
     --accent-color: #5A5A40;
@@ -16,13 +19,35 @@
 }
 
 body {
-    background-color: var(--bg-color);
     color: var(--ink-color);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    /* Layered “fine paper”: soft vignettes + cross-hatch grain (pure CSS, no bitmap) */
+    background-color: var(--bg-color);
+    background-image:
+        radial-gradient(ellipse 140% 90% at 50% -25%, rgba(90, 90, 64, 0.09), transparent 58%),
+        radial-gradient(ellipse 85% 70% at 110% 85%, rgba(120, 98, 72, 0.07), transparent 52%),
+        radial-gradient(ellipse 75% 60% at -15% 90%, rgba(160, 140, 108, 0.06), transparent 48%),
+        linear-gradient(180deg, rgba(255, 252, 245, 0.5) 0%, transparent 42%, rgba(235, 228, 214, 0.35) 100%),
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(58, 52, 40, 0.014) 2px,
+            rgba(58, 52, 40, 0.014) 3px
+        ),
+        repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 2px,
+            rgba(58, 52, 40, 0.01) 2px,
+            rgba(58, 52, 40, 0.01) 4px
+        );
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat;
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, auto, auto;
 }
 
 h1, h2, h3, h4 {
@@ -40,9 +65,10 @@ header {
     position: sticky;
     top: 0;
     z-index: 50;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    background: rgba(244, 241, 234, 0.78);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(90, 90, 64, 0.1);
     padding: 16px 0;
 }
 
@@ -177,7 +203,7 @@ label {
     font-size: 14px;
     font-family: var(--font-sans);
     outline: none;
-    background: transparent;
+    background: var(--bg-elevated);
     transition: border-color 0.2s;
 }
 
@@ -235,7 +261,7 @@ button.card-link {
 
 .card-image-wrap {
     aspect-ratio: 2 / 3;
-    background-color: #e5e5e5;
+    background-color: rgba(232, 226, 214, 0.9);
     border-radius: 8px;
     overflow: hidden;
     margin-bottom: 16px;
@@ -296,8 +322,8 @@ button.card-link {
 .search-container input {
     width: 100%;
     border-radius: 9999px;
-    border: 1px solid rgba(26, 26, 26, 0.1);
-    background-color: #fff;
+    border: 1px solid rgba(90, 90, 64, 0.14);
+    background-color: var(--bg-elevated);
     padding: 10px 16px 10px 40px;
     font-size: 14px;
     outline: none;
@@ -321,7 +347,8 @@ button.card-link {
 footer {
     padding: 40px 0;
     text-align: center;
-    border-top: 1px solid rgba(0,0,0,0.05);
+    border-top: 1px solid rgba(90, 90, 64, 0.1);
+    background: linear-gradient(180deg, transparent, rgba(235, 228, 214, 0.25));
 }
 footer p {
     color: var(--muted-color);
