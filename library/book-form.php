@@ -54,8 +54,10 @@ $edition = '';
 $error = '';
 $pageScripts = ['assets/js/pages/book-form.js'];
 
-// Fetch all categories for the dropdown
+// Fetch all categories for the dropdown (same source as catalog filters; labels follow current UI language)
 $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+// List up to 6 category rows plus the placeholder option (native pick list, no UX regression on small catalogs).
+$categorySelectSize = count($categories) > 0 ? min(7, count($categories) + 1) : 1;
 
 // Load existing book for editing
 if ($book_id) {
@@ -209,10 +211,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="form-group">
                     <label>Category</label>
-                    <select name="category_id" class="form-input" required>
+                    <select name="category_id" id="bookCategorySelect" class="form-input book-category-select" required size="<?= (int)$categorySelectSize ?>">
                         <option value="">Select a Category</option>
                         <?php foreach($categories as $cat): ?>
-                            <option value="<?= $cat['id'] ?>" <?= $category_id == $cat['id'] ? 'selected' : '' ?>>
+                            <option value="<?= (int)$cat['id'] ?>" <?= (string)$category_id === (string)$cat['id'] ? 'selected' : '' ?>>
                                 <?= htmlspecialchars(sskCategoryDisplayName($cat)) ?>
                             </option>
                         <?php endforeach; ?>

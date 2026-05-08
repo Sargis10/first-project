@@ -15,7 +15,7 @@ $stmt = $pdo->prepare("
            categories.name_i18n as category_name_i18n
     FROM books 
     LEFT JOIN categories ON books.category_id = categories.id 
-    ORDER BY created_at DESC
+    ORDER BY books.created_at DESC
     LIMIT :limit OFFSET :offset
 ");
 $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -38,7 +38,7 @@ $pageScripts = ['assets/js/pages/index.js'];
         
         <div class="search-container">
             <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="searchInput" placeholder="<?= htmlspecialchars(t('index.search_placeholder')) ?>">
+            <input type="text" id="searchInput" name="q" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="<?= htmlspecialchars(t('index.search_placeholder')) ?>">
         </div>
     </div>
 

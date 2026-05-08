@@ -58,5 +58,19 @@ This file is the persistent working memory for this project and should be update
 - Keep pushing project updates to GitHub remotes.
 - Maintain this memory file with major user requests and delivered changes.
 
+## Incident note (2026-05-09) — empty catalog + category picker
+
+**User report (summary):** After multilingual categories shipped, the catalog sometimes showed **no books**, and the **category control** in the book form no longer behaved like a clear list of six choices; category labels must follow the **active UI language**.
+
+**Cause:** The catalog search field used the `input` event to call `resetAndReloadBooks()`, which clears the SSR grid. Some browsers/extensions fire `input` on load (e.g. autofill), so the page could replace the initial 20 books with an **empty API result** before the user touched the UI.
+
+**Fix:**
+- `assets/js/pages/index.js`: only enable live search after the user **focuses** `#searchInput`; `fetch` uses `credentials: 'same-origin'`.
+- `index.php`: `autocomplete="off"` (and related attrs) on search; `ORDER BY books.created_at` qualified.
+- `library/book-form.php`: category `<select>` uses `size` so small catalogs (e.g. six categories + placeholder) show as a **visible pick list**; option `selected` compare normalized to string.
+- `CSS/style.css`: `select.book-category-select[size]` sizing.
+
+**Deploy routine:** Push `main` to both GitHub remotes (`origin` Samvel10, `sargis` Sargis10); on Hetzner, `git pull` only under `/opt/libery-from-practic`, then `systemctl restart ssk-app`.
+
 ## Next planned step
-- Mirror current project state to additional repository `https://github.com/Sargis10/first-project.git` and continue syncing future updates there.
+- Keep `main` in sync on both GitHub remotes and redeploy the Hetzner unit after material changes.

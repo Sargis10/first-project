@@ -346,6 +346,13 @@ label {
     resize: vertical;
 }
 
+select.form-input.book-category-select[size] {
+    height: auto;
+    min-height: 2.75rem;
+    padding: 8px 12px;
+    line-height: 1.35;
+}
+
 .error-text {
     color: #ef4444;
     font-size: 13px;
