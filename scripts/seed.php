@@ -17,5 +17,5 @@ if (!$stmt->fetch()) {
 
 echo "<strong>Email:</strong> admin@libris.com <br>";
 echo "<strong>Password:</strong> password123 <br><br>";
-echo "<a href='/login.php'>Go to Login</a>";
+echo "<a href='/auth/login.php'>Go to Login</a>";
 ?>
