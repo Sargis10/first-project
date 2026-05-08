@@ -42,16 +42,16 @@ body {
             rgba(58, 52, 40, 0.01) 2px,
             rgba(58, 52, 40, 0.01) 4px
         ),
-        radial-gradient(ellipse 140% 90% at 50% -25%, rgba(90, 90, 64, 0.09), transparent 58%),
-        radial-gradient(ellipse 85% 70% at 110% 85%, rgba(120, 98, 72, 0.07), transparent 52%),
-        radial-gradient(ellipse 75% 60% at -15% 90%, rgba(160, 140, 108, 0.06), transparent 48%),
-        linear-gradient(180deg, rgba(255, 252, 245, 0.5) 0%, transparent 42%, rgba(235, 228, 214, 0.35) 100%),
+        radial-gradient(ellipse 140% 90% at 50% -25%, rgba(90, 90, 64, 0.045), transparent 58%),
+        radial-gradient(ellipse 85% 70% at 110% 85%, rgba(120, 98, 72, 0.035), transparent 52%),
+        radial-gradient(ellipse 75% 60% at -15% 90%, rgba(160, 140, 108, 0.03), transparent 48%),
+        linear-gradient(180deg, rgba(255, 252, 245, 0.28) 0%, transparent 42%, rgba(235, 228, 214, 0.18) 100%),
         linear-gradient(
             180deg,
-            rgba(244, 241, 234, 0.9) 0%,
-            rgba(244, 241, 234, 0.72) 38%,
-            rgba(244, 241, 234, 0.68) 65%,
-            rgba(244, 241, 234, 0.88) 100%
+            rgba(244, 241, 234, 0.48) 0%,
+            rgba(244, 241, 234, 0.2) 40%,
+            rgba(244, 241, 234, 0.14) 68%,
+            rgba(244, 241, 234, 0.38) 100%
         ),
         url("/assets/images/library-reading-room-bg.webp");
     background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
