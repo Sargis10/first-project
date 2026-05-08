@@ -298,6 +298,20 @@ main {
     margin-bottom: 1.75rem;
 }
 
+/* Small caps line above search — text only, no panel / white block */
+.catalog-search-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted-color);
+    margin-bottom: 10px;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
 .catalog-page .catalog-search-field {
     position: relative;
     width: 100%;
@@ -307,18 +321,16 @@ main {
 .catalog-page .catalog-search-field input {
     width: 100%;
     border-radius: 12px;
-    border: 1px solid rgba(90, 90, 64, 0.18);
-    /* Glass field so the library background art stays visible (no solid white card). */
-    background: rgba(255, 254, 250, 0.42);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    /* No filled “card”: outline only so the library background painting stays visible */
+    border: 1px solid rgba(90, 90, 64, 0.32);
+    background: transparent;
     padding: 14px 18px 14px 48px;
     font-size: 15px;
     line-height: 1.35;
     outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    transition: border-color 0.2s ease, background 0.2s ease;
     font-family: var(--font-sans);
-    box-shadow: 0 2px 14px rgba(90, 90, 64, 0.06);
+    box-shadow: none;
 }
 
 .catalog-page .catalog-search-field input::placeholder {
@@ -331,10 +343,8 @@ main {
 
 .catalog-page .catalog-search-field input:focus {
     border-color: var(--accent-color);
-    background: rgba(255, 254, 250, 0.58);
-    box-shadow:
-        0 0 0 3px rgba(90, 90, 64, 0.1),
-        0 4px 20px rgba(90, 90, 64, 0.08);
+    background: rgba(255, 254, 250, 0.14);
+    box-shadow: none;
 }
 
 .catalog-page .catalog-search-field .search-icon {

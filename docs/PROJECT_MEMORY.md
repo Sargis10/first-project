@@ -46,7 +46,7 @@ This file is the persistent working memory for this project and should be update
 - MySQL/MariaDB server
 
 ## Latest updates (2026-05-09)
-- Catalog search UX: on `index.php` the search field is a full-width bar below the title; no duplicate label above the field; input uses a light glass style (`backdrop-filter`) so the page background art stays visible.
+- Catalog search UX: full-width bar below the hero title; visible `index.search_label` above the field; search input is **transparent** (border-only) so the library background art is not covered by a white/frosted block.
 - Security hardening: env-based DB credentials, CSRF protection on state-changing forms, stricter session cookie settings, and safer error output.
 - UI upgrade: redesigned `library/about.php` with rich default content and custom `assets/css/pages/about.css`.
 - Visual identity: global classic-library background art with readable overlay tuning in `CSS/style.css`.

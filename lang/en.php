@@ -54,6 +54,7 @@ return [
     'index.title' => 'My Library',
     'index.subtitle' => 'Explore the full library catalog.',
     'index.search_placeholder' => 'Search books...',
+    'index.search_label' => 'Search catalog',
     'index.all_books' => 'All Books',
     'index.no_books_title' => 'No books found',
     'index.no_books_subtitle' => 'Start your collection by adding your first book.',
