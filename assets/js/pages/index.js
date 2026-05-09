@@ -15,6 +15,10 @@ let searchDebounce = null;
 /** Avoid wiping SSR book grid on spurious input (browser autofill, extensions) before user focuses search. */
 let searchLiveEnabled = false;
 let userInteractedWithSearch = false;
+let activeController = null;
+let requestSerial = 0;
+const responseCache = new Map();
+const MAX_CACHE_ENTRIES = 40;
 
 if (booksGrid) {
     offset = parseInt(booksGrid.dataset.offset || '20', 10);
@@ -36,39 +40,85 @@ function buildUrl() {
     return `/library/load-books.php?${params.toString()}`;
 }
 
+function cacheGet(key) {
+    if (!responseCache.has(key)) return null;
+    const value = responseCache.get(key);
+    // Keep most recently used entries warm.
+    responseCache.delete(key);
+    responseCache.set(key, value);
+    return value;
+}
+
+function cacheSet(key, value) {
+    if (responseCache.has(key)) {
+        responseCache.delete(key);
+    }
+    responseCache.set(key, value);
+    if (responseCache.size > MAX_CACHE_ENTRIES) {
+        const oldestKey = responseCache.keys().next().value;
+        responseCache.delete(oldestKey);
+    }
+}
+
+function applyBooksResponse(data) {
+    if (!booksGrid) return;
+    if (data.html) {
+        booksGrid.insertAdjacentHTML('beforeend', data.html);
+    }
+    hasMore = !!data.has_more;
+    if (data.next_offset !== undefined) {
+        offset = parseInt(data.next_offset, 10);
+    } else {
+        offset += limit;
+    }
+    updateNoResultsVisibility();
+
+    if (!hasMore) {
+        if (sentinel) sentinel.style.display = 'none';
+        if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+    }
+}
+
 async function loadMoreBooks() {
     if (!booksGrid || loading || !hasMore) return;
     loading = true;
 
     const url = buildUrl();
+    const cacheKey = `${currentCategory}|${currentSearch}|${offset}|${limit}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) {
+        applyBooksResponse(cached);
+        loading = false;
+        if (loadMoreBtn) loadMoreBtn.disabled = false;
+        return;
+    }
 
     try {
         if (loadMoreBtn) loadMoreBtn.disabled = true;
+        if (activeController) {
+            activeController.abort();
+        }
+        activeController = new AbortController();
+        const thisRequest = ++requestSerial;
 
         const resp = await fetch(url, {
             credentials: 'same-origin',
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            signal: activeController.signal,
         });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
         const data = await resp.json();
-        if (data.html) {
-            booksGrid.insertAdjacentHTML('beforeend', data.html);
+        // Ignore stale responses that arrive after a newer request.
+        if (thisRequest !== requestSerial) {
+            return;
         }
-
-        hasMore = !!data.has_more;
-        if (data.next_offset !== undefined) {
-            offset = parseInt(data.next_offset, 10);
-        } else {
-            offset += limit;
-        }
-        updateNoResultsVisibility();
-
-        if (!hasMore) {
-            if (sentinel) sentinel.style.display = 'none';
-            if (loadMoreBtn) loadMoreBtn.style.display = 'none';
-        }
+        cacheSet(cacheKey, data);
+        applyBooksResponse(data);
     } catch (e) {
+        if (e && e.name === 'AbortError') {
+            return;
+        }
         // Keep UI usable even if loading fails.
         console.error('Failed to load more books', e);
         hasMore = false;
@@ -76,6 +126,7 @@ async function loadMoreBooks() {
         if (loadMoreBtn) loadMoreBtn.style.display = 'none';
     } finally {
         loading = false;
+        activeController = null;
         if (loadMoreBtn) loadMoreBtn.disabled = false;
     }
 }
@@ -124,7 +175,7 @@ if (searchInput) {
         if (searchDebounce) clearTimeout(searchDebounce);
         searchDebounce = setTimeout(() => {
             resetAndReloadBooks();
-        }, 220);
+        }, 320);
     });
 }
 

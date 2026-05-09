@@ -35,7 +35,7 @@ if ($category !== '' && sskLower($category) !== 'all') {
 }
 
 if ($query !== '') {
-    $sql .= " AND ((books.title COLLATE utf8mb4_unicode_ci) LIKE :q_title OR (books.author COLLATE utf8mb4_unicode_ci) LIKE :q_author)";
+    $sql .= " AND (books.title LIKE :q_title OR books.author LIKE :q_author)";
     $wildcardQuery = '%' . $query . '%';
     $params[':q_title'] = $wildcardQuery;
     $params[':q_author'] = $wildcardQuery;
