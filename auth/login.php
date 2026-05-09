@@ -14,17 +14,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
 
     if (!empty($email) && !empty($password)) {
-        $stmt = $pdo->prepare("SELECT id, password, role FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['role'] = $user['role'] ?? 'user';
-            header("Location: /index.php");
-            exit;
+        $email = trim((string)$email);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error = t('auth.invalid_email');
         } else {
-            $error = t('auth.invalid_credentials');
+            $stmt = $pdo->prepare("SELECT id, password, role FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($user && password_verify($password, $user['password'])) {
+                session_regenerate_id(true);
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['role'] = $user['role'] ?? 'user';
+                header("Location: /index.php");
+                exit;
+            } else {
+                $error = t('auth.invalid_credentials');
+            }
         }
     } else {
         $error = t('auth.fill_all_fields');

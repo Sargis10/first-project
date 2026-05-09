@@ -48,6 +48,7 @@ return [
     'auth.no_account' => 'Չունե՞ք հաշիվ։',
     'auth.register_here' => 'Գրանցվեք այստեղ',
     'auth.invalid_credentials' => 'Սխալ էլ․ հասցե կամ գաղտնաբառ',
+    'auth.invalid_email' => 'Մուտքագրեք վավեր էլ․ հասցե։',
     'auth.fill_all_fields' => 'Լրացրեք բոլոր դաշտերը',
 
     'auth.register.title' => 'Միացեք Libris-ին',
@@ -55,7 +56,7 @@ return [
     'auth.create_account' => 'Ստեղծել հաշիվ',
     'auth.already_have_account' => 'Արդեն ունե՞ք հաշիվ։',
     'auth.login_here' => 'Մուտք գործեք այստեղ',
-    'auth.password_min' => 'Գաղտնաբառը պետք է լինի առնվազն 6 նիշ։',
+    'auth.password_min' => 'Գաղտնաբառը պետք է լինի առնվազն 10 նիշ։',
     'auth.email_in_use' => 'Այս էլ․ հասցեն արդեն օգտագործվում է։',
     'auth.registration_failed' => 'Գրանցումը չհաջողվեց։ Փորձեք կրկին։',
 

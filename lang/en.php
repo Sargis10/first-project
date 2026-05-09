@@ -73,6 +73,7 @@ return [
     'auth.no_account' => "Don't have an account?",
     'auth.register_here' => 'Register here',
     'auth.invalid_credentials' => 'Invalid email or password',
+    'auth.invalid_email' => 'Please enter a valid email address.',
     'auth.fill_all_fields' => 'Please fill all fields',
 
     'auth.register.title' => 'Join Libris',
@@ -80,7 +81,7 @@ return [
     'auth.create_account' => 'Create Account',
     'auth.already_have_account' => 'Already have an account?',
     'auth.login_here' => 'Login here',
-    'auth.password_min' => 'Password must be at least 6 characters.',
+    'auth.password_min' => 'Password must be at least 10 characters.',
     'auth.email_in_use' => 'Email is already in use.',
     'auth.registration_failed' => 'Registration failed. Try again.',
 

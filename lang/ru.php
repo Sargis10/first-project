@@ -48,6 +48,7 @@ return [
     'auth.no_account' => 'Нет аккаунта?',
     'auth.register_here' => 'Зарегистрируйтесь',
     'auth.invalid_credentials' => 'Неверный email или пароль',
+    'auth.invalid_email' => 'Введите корректный адрес электронной почты.',
     'auth.fill_all_fields' => 'Заполните все поля',
 
     'auth.register.title' => 'Присоединяйтесь к Libris',
@@ -55,7 +56,7 @@ return [
     'auth.create_account' => 'Создать аккаунт',
     'auth.already_have_account' => 'Уже есть аккаунт?',
     'auth.login_here' => 'Войти',
-    'auth.password_min' => 'Пароль должен быть не менее 6 символов.',
+    'auth.password_min' => 'Пароль должен быть не менее 10 символов.',
     'auth.email_in_use' => 'Этот email уже используется.',
     'auth.registration_failed' => 'Регистрация не удалась. Попробуйте снова.',
 

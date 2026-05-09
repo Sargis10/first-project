@@ -14,7 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
 
     if (!empty($email) && !empty($password)) {
-        if (strlen($password) < 6) {
+        $email = trim((string)$email);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error = t('auth.invalid_email');
+        } elseif (strlen($password) < 10) {
             $error = t('auth.password_min');
         } else {
             // Check if email exists
@@ -27,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $hash = password_hash($password, PASSWORD_DEFAULT);
                 $stmt = $pdo->prepare("INSERT INTO users (email, password) VALUES (?, ?)");
                 if ($stmt->execute([$email, $hash])) {
+                    session_regenerate_id(true);
                     $_SESSION['user_id'] = $pdo->lastInsertId();
                     $_SESSION['role'] = 'user';
                     header("Location: /index.php");
@@ -59,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="form-group">
                 <label><?= htmlspecialchars(t('auth.password')) ?></label>
-                <input type="password" name="password" class="form-input" required minlength="6">
+                <input type="password" name="password" class="form-input" required minlength="10">
             </div>
 
             <?php if ($error): ?>

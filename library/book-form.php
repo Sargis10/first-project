@@ -25,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         verifyCsrfTokenOrFail();
         $bid = (int)($_POST['book_id'] ?? 0);
         if ($bid > 0) {
-            $stmt = $pdo->prepare("SELECT id FROM books WHERE id = ?");
-            $stmt->execute([$bid]);
+            $stmt = $pdo->prepare("SELECT id FROM books WHERE id = ? AND user_id = ?");
+            $stmt->execute([$bid, $user_id]);
             if ($stmt->fetch()) {
                 $_SESSION['ssk_edit_book_id'] = $bid;
             }
@@ -59,10 +59,10 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
 // List up to 6 category rows plus the placeholder option (native pick list, no UX regression on small catalogs).
 $categorySelectSize = count($categories) > 0 ? min(7, count($categories) + 1) : 1;
 
-// Load existing book for editing
+// Load existing book for editing (owner only — matches book-details edit/delete rules)
 if ($book_id) {
-    $stmt = $pdo->prepare("SELECT * FROM books WHERE id = ?");
-    $stmt->execute([$book_id]);
+    $stmt = $pdo->prepare("SELECT * FROM books WHERE id = ? AND user_id = ?");
+    $stmt->execute([$book_id, $user_id]);
     $book = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$book) {
@@ -95,7 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title'] ?? '');
     $author = trim($_POST['author'] ?? '');
     $description = trim($_POST['description'] ?? '');
-    $category_id = $_POST['category_id'] ?? null;
     $isbn = trim($_POST['isbn'] ?? '');
     $publisher = trim($_POST['publisher'] ?? '');
     $publishYearRaw = $_POST['publish_year'] ?? null;
@@ -117,27 +116,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $format = trim($_POST['format'] ?? '');
     $edition = trim($_POST['edition'] ?? '');
     
-    // Process File Upload
+    // Process File Upload (type + size validated; extension never taken from user filename)
     if (isset($_FILES['cover']) && $_FILES['cover']['error'] === UPLOAD_ERR_OK) {
-        $tmp_name = $_FILES['cover']['tmp_name'];
-        $name = basename($_FILES['cover']['name']);
-        
-        // Ensure uploads dir
-        $upload_dir = 'uploads/';
-        if (!is_dir($upload_dir)) { mkdir($upload_dir, 0755, true); }
-        
-        $new_name = $user_id . '_' . time() . '_' . preg_replace("/[^a-zA-Z0-9.]/", "_", $name);
-        $destination = $upload_dir . $new_name;
-        
-        if (move_uploaded_file($tmp_name, $destination)) {
-            $cover_url = $destination;
+        $maxBytes = 5 * 1024 * 1024;
+        if ((int)$_FILES['cover']['size'] > $maxBytes) {
+            $error = 'Cover image is too large (max 5 MB).';
         } else {
-            $error = "Failed to upload image.";
+            $tmp_name = $_FILES['cover']['tmp_name'];
+            $upload_dir = 'uploads/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0755, true);
+            }
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file($tmp_name);
+            $mimeToExt = [
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+                'image/webp' => 'webp',
+                'image/gif' => 'gif',
+            ];
+            if (!isset($mimeToExt[$mime])) {
+                $error = 'Cover must be a JPEG, PNG, WebP, or GIF image.';
+            } elseif (!is_uploaded_file($tmp_name)) {
+                $error = 'Invalid upload.';
+            } else {
+                $safeBase = $user_id . '_' . time() . '_' . bin2hex(random_bytes(4));
+                $destination = $upload_dir . $safeBase . '.' . $mimeToExt[$mime];
+                if (move_uploaded_file($tmp_name, $destination)) {
+                    $cover_url = $destination;
+                } else {
+                    $error = 'Failed to upload image.';
+                }
+            }
         }
     }
 
-    if (empty($title) || empty($author) || empty($category_id)) {
+    $category_id = isset($_POST['category_id']) ? (int)$_POST['category_id'] : 0;
+    if (empty($title) || empty($author) || $category_id <= 0) {
         $error = "Title, Author, and Category are required.";
+    } else {
+        $catCheck = $pdo->prepare('SELECT 1 FROM categories WHERE id = ?');
+        $catCheck->execute([$category_id]);
+        if (!$catCheck->fetchColumn()) {
+            $error = 'Invalid category selected.';
+        }
     }
 
     if (!$error) {
@@ -147,14 +169,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // $cover_url already set by the upload logic above
             } else {
                 // Fetch the existing cover_url to preserve it
-                $stmt_fetch = $pdo->prepare("SELECT cover_url FROM books WHERE id = ?");
-                $stmt_fetch->execute([$book_id]);
+                $stmt_fetch = $pdo->prepare("SELECT cover_url FROM books WHERE id = ? AND user_id = ?");
+                $stmt_fetch->execute([$book_id, $user_id]);
                 $old_cover = $stmt_fetch->fetchColumn();
                 $cover_url = $old_cover;
             }
 
-            $stmt = $pdo->prepare("UPDATE books SET title=?, author=?, description=?, cover_url=?, category_id=?, isbn=?, publisher=?, publish_year=?, language=?, page_count=?, author_bio=?, format=?, edition=?, updated_at=CURRENT_TIMESTAMP WHERE id=?");
-            $stmt->execute([$title, $author, $description, $cover_url, $category_id, $isbn, $publisher, $publish_year, $language, $page_count, $author_bio, $format, $edition, $book_id]);
+            $stmt = $pdo->prepare("UPDATE books SET title=?, author=?, description=?, cover_url=?, category_id=?, isbn=?, publisher=?, publish_year=?, language=?, page_count=?, author_bio=?, format=?, edition=?, updated_at=CURRENT_TIMESTAMP WHERE id=? AND user_id=?");
+            $stmt->execute([$title, $author, $description, $cover_url, $category_id, $isbn, $publisher, $publish_year, $language, $page_count, $author_bio, $format, $edition, $book_id, $user_id]);
+            // Note: MySQL may report 0 rows "changed" when values are identical; WHERE still enforced owner id.
             unset($_SESSION['ssk_edit_book_id']);
             $_SESSION['ssk_view_book_id'] = (int)$book_id;
             header("Location: /library/book-details.php");

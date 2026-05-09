@@ -320,6 +320,19 @@ try {
     die("Database initialization failed. Contact administrator.");
 }
 
+/**
+ * Baseline security headers for HTML responses (safe defaults; CSP omitted due to inline styles).
+ */
+function sskSendSecurityHeaders(): void {
+    if (headers_sent()) {
+        return;
+    }
+    header('X-Frame-Options: SAMEORIGIN');
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+}
+
 // Helper to check if logged in
 function isLoggedIn() {
     return isset($_SESSION['user_id']);
@@ -348,5 +361,9 @@ function currentUserId() {
 // Helper to check if current user is admin
 function isAdmin() {
     return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+}
+
+if (!in_array(PHP_SAPI, ['cli', 'phpdbg'], true)) {
+    sskSendSecurityHeaders();
 }
 ?>

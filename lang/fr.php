@@ -48,6 +48,7 @@ return [
     'auth.no_account' => "Vous n'avez pas de compte ?",
     'auth.register_here' => 'Inscrivez-vous ici',
     'auth.invalid_credentials' => 'E-mail ou mot de passe invalide',
+    'auth.invalid_email' => 'Veuillez saisir une adresse e-mail valide.',
     'auth.fill_all_fields' => 'Veuillez remplir tous les champs',
 
     'auth.register.title' => 'Rejoignez Libris',
@@ -55,7 +56,7 @@ return [
     'auth.create_account' => 'Créer un compte',
     'auth.already_have_account' => 'Vous avez déjà un compte ?',
     'auth.login_here' => 'Connectez-vous ici',
-    'auth.password_min' => 'Le mot de passe doit contenir au moins 6 caractères.',
+    'auth.password_min' => 'Le mot de passe doit contenir au moins 10 caractères.',
     'auth.email_in_use' => "L'e-mail est déjà utilisé.",
     'auth.registration_failed' => "L'inscription a échoué. Réessayez.",
 

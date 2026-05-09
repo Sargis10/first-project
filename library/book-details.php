@@ -62,7 +62,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     verifyCsrfTokenOrFail();
     $act = $_POST['action'];
     if ($act === 'update_status') {
-        $new_status = $_POST['status'] ?? 'none';
+        $new_status = (string)($_POST['status'] ?? 'none');
+        $allowedStatuses = ['none', 'want_to_read', 'reading', 'read'];
+        if (!in_array($new_status, $allowedStatuses, true)) {
+            $new_status = 'none';
+        }
         if ($new_status === 'none') {
             $pdo->prepare("DELETE FROM user_books WHERE user_id = ? AND book_id = ?")->execute([$user_id, $book_id]);
         } else {

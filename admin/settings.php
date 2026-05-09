@@ -12,9 +12,20 @@ $error = '';
 // Handle Updates
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verifyCsrfTokenOrFail();
+    $allowedSettingKeys = [
+        'about_title',
+        'about_hero',
+        'about_story',
+        'about_mission',
+        'about_vision',
+    ];
     try {
         $pdo->beginTransaction();
-        foreach ($_POST['settings'] as $key => $value) {
+        foreach ($_POST['settings'] ?? [] as $key => $value) {
+            if (!is_string($key) || !in_array($key, $allowedSettingKeys, true)) {
+                continue;
+            }
+            $value = is_string($value) ? $value : '';
             $stmt = $pdo->prepare("INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?");
             $stmt->execute([$key, $value, $value]);
         }

@@ -49,6 +49,7 @@ return [
     'auth.no_account' => 'Noch kein Konto?',
     'auth.register_here' => 'Hier registrieren',
     'auth.invalid_credentials' => 'Ungültige E-Mail oder Passwort',
+    'auth.invalid_email' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
     'auth.fill_all_fields' => 'Bitte alle Felder ausfüllen',
 
     'auth.register.title' => 'Libris beitreten',
@@ -56,7 +57,7 @@ return [
     'auth.create_account' => 'Konto erstellen',
     'auth.already_have_account' => 'Bereits ein Konto?',
     'auth.login_here' => 'Hier anmelden',
-    'auth.password_min' => 'Das Passwort muss mindestens 6 Zeichen lang sein.',
+    'auth.password_min' => 'Das Passwort muss mindestens 10 Zeichen lang sein.',
     'auth.email_in_use' => 'Diese E-Mail-Adresse wird bereits verwendet.',
     'auth.registration_failed' => 'Registrierung fehlgeschlagen. Bitte erneut versuchen.',
 

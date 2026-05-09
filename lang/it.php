@@ -49,6 +49,7 @@ return [
     'auth.no_account' => 'Non hai un account?',
     'auth.register_here' => 'Registrati qui',
     'auth.invalid_credentials' => 'E-mail o password non validi',
+    'auth.invalid_email' => 'Inserisci un indirizzo e-mail valido.',
     'auth.fill_all_fields' => 'Compila tutti i campi',
 
     'auth.register.title' => 'Unisciti a Libris',
@@ -56,7 +57,7 @@ return [
     'auth.create_account' => 'Crea account',
     'auth.already_have_account' => 'Hai già un account?',
     'auth.login_here' => 'Accedi qui',
-    'auth.password_min' => 'La password deve contenere almeno 6 caratteri.',
+    'auth.password_min' => 'La password deve contenere almeno 10 caratteri.',
     'auth.email_in_use' => 'Questa e-mail è già in uso.',
     'auth.registration_failed' => 'Registrazione non riuscita. Riprova.',
 

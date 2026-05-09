@@ -1,0 +1,6 @@
+# Block script execution in uploaded files (Apache).
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)\.(php|phtml|phar|cgi|pl|py)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
