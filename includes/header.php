@@ -32,6 +32,7 @@ if (!function_exists('sskAssetHref')) {
     <?php foreach ($pageStyles as $stylePath): ?>
         <link rel="stylesheet" href="<?= htmlspecialchars(sskAssetHref((string) $stylePath)) ?>">
     <?php endforeach; ?>
+    <script src="<?= htmlspecialchars(sskAssetHref('/assets/js/ssk-ui.js')) ?>" defer></script>
     <script src="<?= htmlspecialchars(sskAssetHref('/assets/js/lang-menu.js')) ?>" defer></script>
 </head>
 

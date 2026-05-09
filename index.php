@@ -60,14 +60,17 @@ $pageScripts = ['assets/js/pages/index.js'];
                         <input type="hidden" name="book_id" value="<?= (int)$book['id'] ?>">
                         <button type="submit" class="card-link">
                             <div class="card-image-wrap">
-                                <?php $cardCover = sskSafePublicCoverPath($book['cover_url'] ?? null); ?>
+                                <?php
+                                $cardCover = sskSafePublicCoverPath($book['cover_url'] ?? null);
+                                $cardPh = 'https://placehold.co/400x600/1a1a1a/ffffff?text=' . rawurlencode((string)$book['title']);
+                                ?>
                                 <?php if ($cardCover !== ''): ?>
                                     <img src="<?= htmlspecialchars($cardCover) ?>"
                                          alt="Cover"
                                          loading="<?= $index < 4 ? 'eager' : 'lazy' ?>"
                                          decoding="async"
                                          fetchpriority="<?= $index < 4 ? 'high' : 'low' ?>"
-                                         onerror="this.onerror=null; this.src='https://placehold.co/400x600/1a1a1a/ffffff?text=<?= urlencode($book['title']) ?>';">
+                                         data-ssk-placeholder="<?= htmlspecialchars($cardPh, ENT_QUOTES, 'UTF-8') ?>">
                                 <?php else: ?>
                                     <svg class="placeholder-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
                                 <?php endif; ?>

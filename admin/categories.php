@@ -165,7 +165,7 @@ $editNames = $editRow ? sskCategoryNamesDecode($editRow['name_i18n'] ?? null) : 
                     <td style="padding: 16px 24px; color: var(--muted-color); font-family: ui-monospace, monospace; font-size: 13px;"><?= htmlspecialchars($cat['slug'] ?? '') ?></td>
                     <td style="padding: 16px 24px; text-align: right; white-space: nowrap;">
                         <a href="<?= htmlspecialchars(sskUrl('manage_topics', ['edit' => (int)$cat['id']])) ?>" class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px;"><?= htmlspecialchars(t('admin.categories.edit_btn')) ?></a>
-                        <form method="POST" style="margin: 0; display: inline;" onsubmit="return confirm('<?= htmlspecialchars(t('admin.categories.delete_confirm')) ?>');">
+                        <form method="POST" style="margin: 0; display: inline;" data-ssk-confirm="<?= htmlspecialchars(t('admin.categories.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="id" value="<?= (int)$cat['id'] ?>">

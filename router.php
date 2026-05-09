@@ -10,6 +10,7 @@ $docroot = __DIR__;
 $uri = rawurldecode(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
 
 require_once $docroot . '/includes/routes.php';
+require_once $docroot . '/includes/rate_limit.php';
 
 // 301 from legacy *.php URLs to opaque routes (reduces fingerprinting).
 $legacy = sskLegacyRedirects();
@@ -30,6 +31,18 @@ if ($uri !== '/' && is_file($fsPath)) {
 }
 if ($uri !== '/' && is_dir($fsPath)) {
     return false;
+}
+
+$rlMaxRaw = getenv('SSK_GLOBAL_RL_MAX');
+$rlWinRaw = getenv('SSK_GLOBAL_RL_WINDOW');
+$globalRlMax = ($rlMaxRaw !== false && $rlMaxRaw !== '') ? max(0, (int)$rlMaxRaw) : 480;
+$globalRlWin = ($rlWinRaw !== false && $rlWinRaw !== '') ? max(1, (int)$rlWinRaw) : 60;
+if ($globalRlMax > 0 && sskRateLimitExceeded('global_dynamic', $globalRlMax, $globalRlWin)) {
+    http_response_code(429);
+    header('Retry-After: ' . $globalRlWin);
+    header('Content-Type: text/plain; charset=UTF-8');
+    echo 'Too many requests';
+    return true;
 }
 
 $handlers = sskPublicPathHandlers();

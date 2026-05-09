@@ -9,7 +9,15 @@ if (!isLoggedIn()) {
     exit;
 }
 
-if (sskRateLimitExceeded('catalog_api', 180, 60)) {
+$catUid = (int)($_SESSION['user_id'] ?? 0);
+if ($catUid > 0 && sskRateLimitExceeded('catalog_uid:' . $catUid, 300, 60)) {
+    http_response_code(429);
+    header('Retry-After: 60');
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['error' => 'Too many requests']);
+    exit;
+}
+if (sskRateLimitExceeded('catalog_ip', 1500, 60)) {
     http_response_code(429);
     header('Retry-After: 60');
     header('Content-Type: application/json; charset=utf-8');
@@ -74,6 +82,7 @@ foreach ($rows as $book) {
         : 'uncategorized';
 
     $safeCover = sskSafePublicCoverPath($book['cover_url'] ?? null);
+    $placeholderUrl = 'https://placehold.co/400x600/1a1a1a/ffffff?text=' . rawurlencode((string)($book['title'] ?? ''));
     $html .= '
         <div class="card-item" 
              data-title="' . htmlspecialchars($title) . '" 
@@ -92,7 +101,7 @@ foreach ($rows as $book) {
                                      loading="lazy"
                                      decoding="async"
                                      fetchpriority="low"
-                                     onerror="this.onerror=null; this.src=\'https://placehold.co/400x600/1a1a1a/ffffff?text=' . urlencode((string)$book['title']) . '\';">'
+                                     data-ssk-placeholder="' . htmlspecialchars($placeholderUrl, ENT_QUOTES, 'UTF-8') . '">'
                                 : '<svg class="placeholder-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>'
                         ) . '
                     </div>

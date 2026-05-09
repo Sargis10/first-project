@@ -1,0 +1,9 @@
+# Optional edge rate limit (Nginx) — complements app-level limits in router.php + PHP.
+# Adjust zone size and rate for your traffic profile.
+#
+# In http {}:
+#   limit_req_zone $binary_remote_addr zone=ssk_perip:10m rate=20r/s;
+#
+# In server {} for the site:
+#   limit_req zone=ssk_perip burst=80 nodelay;
+#   limit_req_status 429;

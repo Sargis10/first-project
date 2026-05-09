@@ -1,3 +1,9 @@
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('input.book-cover-input').forEach(function (inp) {
+        inp.addEventListener('change', previewFile);
+    });
+});
+
 function previewFile() {
     const preview = document.getElementById('previewImage');
     const fileInput = document.querySelector('input[type=file]');

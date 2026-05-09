@@ -167,13 +167,19 @@ $all_users = $pdo->query("
         </div>
     </div>
 
-    <script>
+    <?php
+    $dashJsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE;
+    if (defined('JSON_THROW_ON_ERROR')) {
+        $dashJsonFlags |= JSON_THROW_ON_ERROR;
+    }
+    ?>
+    <script nonce="<?= htmlspecialchars(sskCspNonce(), ENT_QUOTES, 'UTF-8') ?>">
         document.addEventListener('DOMContentLoaded', function() {
             // Prepare data from PHP with fallback to empty arrays
-            const userGrowthData = <?= json_encode($user_growth_data ?? []) ?>;
-            const bookUploadsData = <?= json_encode($book_uploads_data ?? []) ?>;
-            const topUploadersData = <?= json_encode($top_uploaders_data ?? []) ?>;
-            const categoryDistributionData = <?= json_encode($category_distribution_data ?? []) ?>;
+            const userGrowthData = <?= json_encode($user_growth_data ?? [], $dashJsonFlags) ?>;
+            const bookUploadsData = <?= json_encode($book_uploads_data ?? [], $dashJsonFlags) ?>;
+            const topUploadersData = <?= json_encode($top_uploaders_data ?? [], $dashJsonFlags) ?>;
+            const categoryDistributionData = <?= json_encode($category_distribution_data ?? [], $dashJsonFlags) ?>;
 
             const commonOptions = {
                 responsive: true,

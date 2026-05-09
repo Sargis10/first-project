@@ -151,6 +151,10 @@ function renderBookGrid($books, $emptyMsg) {
     } else {
         echo '<div class="book-grid">';
         foreach ($books as $b) {
+            $myPh = 'https://placehold.co/400x600/1a1a1a/ffffff?text=' . rawurlencode((string)($b['title'] ?? ''));
+            $myCover = sskSafePublicCoverPath($b['cover_url'] ?? null);
+            $myImgSrc = $myCover !== '' ? $myCover : $myPh;
+            $myImgPhAttr = $myCover !== '' ? ' data-ssk-placeholder="' . htmlspecialchars($myPh, ENT_QUOTES, 'UTF-8') . '"' : '';
             echo '
             <div class="book-card" style="position: relative;">
                 <form method="POST" action="' . htmlspecialchars(sskUrl('read'), ENT_QUOTES, 'UTF-8') . '" style="margin: 0;">
@@ -159,12 +163,11 @@ function renderBookGrid($books, $emptyMsg) {
                     <input type="hidden" name="book_id" value="' . (int)$b['id'] . '">
                     <button type="submit" style="all: unset; cursor: pointer; display: block; width: 100%; text-align: left; color: inherit;">
                     <div style="aspect-ratio: 2/3; border-radius: 16px; overflow: hidden; background: #f1f5f9; box-shadow: 0 15px 35px -12px rgba(0,0,0,0.15); transition: transform 0.3s; margin-bottom: 20px;">
-                        <img src="' . htmlspecialchars(sskSafePublicCoverPath($b['cover_url'] ?? null)) . '" 
+                        <img src="' . htmlspecialchars($myImgSrc) . '" 
                              loading="lazy"
                              decoding="async"
                              fetchpriority="low"
-                             style="width: 100%; height: 100%; object-fit: cover;" 
-                             onerror="this.onerror=null; this.src=\'https://placehold.co/400x600/1a1a1a/ffffff?text=' . urlencode($b['title']) . '\';">
+                             style="width: 100%; height: 100%; object-fit: cover;"' . $myImgPhAttr . '>
                     </div>
                     <div>
                         <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-color); margin-bottom: 6px;">' . htmlspecialchars(sskBookCategoryDisplay($b)) . '</div>

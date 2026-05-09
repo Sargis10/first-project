@@ -325,8 +325,17 @@ try {
     die("Database initialization failed. Contact administrator.");
 }
 
+/** Per-request nonce for Content-Security-Policy (inline scripts that cannot be externalized). */
+function sskCspNonce(): string {
+    static $nonce = null;
+    if ($nonce === null) {
+        $nonce = base64_encode(random_bytes(16));
+    }
+    return $nonce;
+}
+
 /**
- * Baseline security headers for HTML responses (safe defaults; CSP omitted due to inline styles).
+ * Security headers + strict CSP (scripts locked; inline styles still allowed until CSS refactor).
  */
 function sskSendSecurityHeaders(): void {
     if (headers_sent()) {
@@ -339,6 +348,23 @@ function sskSendSecurityHeaders(): void {
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+
+    $n = sskCspNonce();
+    $csp = implode('; ', [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "object-src 'none'",
+        "frame-ancestors 'self'",
+        "script-src 'self' 'nonce-{$n}' https://cdn.jsdelivr.net",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: https: blob:",
+        "font-src 'self'",
+        "connect-src 'self'",
+        "worker-src 'self' blob:",
+        'upgrade-insecure-requests',
+    ]);
+    header('Content-Security-Policy: ' . $csp);
 }
 
 // Helper to check if logged in

@@ -123,7 +123,7 @@ function simpleMarkdown($text) {
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="16 3 21 8 8 21 3 21 3 16 16 3"></polygon></svg>
                 </button>
             </form>
-            <form method="POST" onsubmit="return confirm('Are you sure you want to delete this book?');" style="margin: 0;">
+            <form method="POST" style="margin: 0;" data-ssk-confirm="<?= htmlspecialchars('Are you sure you want to delete this book?', ENT_QUOTES, 'UTF-8') ?>">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                 <input type="hidden" name="action" value="delete">
                 <button type="submit" class="btn btn-ghost btn-danger" style="padding: 8px;">
@@ -138,14 +138,17 @@ function simpleMarkdown($text) {
         <div class="book-details-grid">
             
             <div style="aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; background: #e5e5e5; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;">
-                <?php $detailCover = sskSafePublicCoverPath($book['cover_url'] ?? null); ?>
+                <?php
+                $detailCover = sskSafePublicCoverPath($book['cover_url'] ?? null);
+                $detailPh = 'https://placehold.co/400x600/1a1a1a/ffffff?text=' . rawurlencode((string)$book['title']);
+                ?>
                 <?php if ($detailCover !== ''): ?>
                     <img src="<?= htmlspecialchars($detailCover) ?>" 
                          loading="eager"
                          decoding="async"
                          fetchpriority="high"
                          style="width: 100%; height: 100%; object-fit: cover;"
-                         onerror="this.onerror=null; this.src='https://placehold.co/400x600/1a1a1a/ffffff?text=<?= urlencode($book['title']) ?>';">
+                         data-ssk-placeholder="<?= htmlspecialchars($detailPh, ENT_QUOTES, 'UTF-8') ?>">
                 <?php else: ?>
                     <svg style="color: #a8a29e;" xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
                 <?php endif; ?>
@@ -164,7 +167,7 @@ function simpleMarkdown($text) {
                     <form method="POST" style="margin: 0; flex: 1;">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                         <input type="hidden" name="action" value="update_status">
-                        <select name="status" onchange="this.form.submit()" class="form-input" style="padding: 10px 16px; font-weight: 600; cursor: pointer; border: 1px solid var(--accent-color); color: var(--accent-color); background: white; border-radius: 8px;">
+                        <select name="status" class="form-input ssk-autosubmit" style="padding: 10px 16px; font-weight: 600; cursor: pointer; border: 1px solid var(--accent-color); color: var(--accent-color); background: white; border-radius: 8px;">
                             <option value="none" <?= $current_status == 'none' ? 'selected' : '' ?>>+ Add to My Reading List</option>
                             <option value="want_to_read" <?= $current_status == 'want_to_read' ? 'selected' : '' ?>>Want to Read</option>
                             <option value="reading" <?= $current_status == 'reading' ? 'selected' : '' ?>>Reading</option>
@@ -175,7 +178,7 @@ function simpleMarkdown($text) {
                     <form method="POST" style="margin: 0;">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                         <input type="hidden" name="action" value="toggle_favorite">
-                        <button type="submit" style="background: none; border: none; cursor: pointer; padding: 8px; color: <?= $is_favorite ? '#e11d48' : '#cbd5e1' ?>; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+                        <button type="submit" class="ssk-fav-btn<?= $is_favorite ? ' is-favorite' : '' ?>">
                             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="<?= $is_favorite ? 'currentColor' : 'none' ?>" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                             </svg>

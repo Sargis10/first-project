@@ -44,6 +44,19 @@ This file is the persistent working memory for this project and should be update
 - Apache or built-in PHP server
 - MySQL/MariaDB server
 
+## Latest updates (2026-05-09) — CSP + NAT-friendly catalog limits + edge deploy hints
+
+**User request:** Address the three “umbrella” gaps: (1) strong browser policy / XSS surface, (2) volumetric abuse beyond app code, (3) corporate NAT sharing one public IP.
+
+**Delivered:**
+- **Content-Security-Policy** in `sskSendSecurityHeaders()` with per-request **`sskCspNonce()`**; `script-src 'self' 'nonce-…' https://cdn.jsdelivr.net`; `style-src 'self' 'unsafe-inline'` (full removal of inline styles deferred); tight `default-src`, `object-src 'none'`, `form-action 'self'`, `frame-ancestors 'self'`, `upgrade-insecure-requests`, `img-src` includes `https:` for placehold.co and `blob:` for local previews.
+- **No inline event handlers** site-wide: `assets/js/ssk-ui.js` (defer, loaded from `includes/header.php`) handles `data-ssk-placeholder` image fallbacks, `data-ssk-confirm` delete dialogs, and `.ssk-autosubmit` selects; book cover file input uses `book-cover-input` + `book-form.js` listener; admin dashboard Chart block uses **nonce** on the one remaining inline script with `JSON_HEX_*`-safe `json_encode`.
+- **Router volumetric cap:** `router.php` applies `sskRateLimitExceeded('global_dynamic', …)` before dynamic handlers; tune with env **`SSK_GLOBAL_RL_MAX`** (default `480` per window) and **`SSK_GLOBAL_RL_WINDOW`** seconds (default `60`). Set `SSK_GLOBAL_RL_MAX=0` to disable.
+- **Catalog API / NAT:** `library/load-books.php` uses **two buckets**: per-user `catalog_uid:{id}` (300/min) and shared IP `catalog_ip` (1500/min).
+- **Deploy examples (optional edge layer):** `deploy/nginx-limit-req.conf.example`, `deploy/apache-mod-ratelimit.conf.example` — real DDoS still needs provider/WAF; these document reverse-proxy knobs.
+
+---
+
 ## Latest updates (2026-05-09) — security hardening pass (rate limits, session sync, covers)
 
 **User request:** Deep security review: assume attackers run many requests and varied techniques; fix what breaks and prevent recurrence.

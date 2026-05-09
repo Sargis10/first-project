@@ -1,0 +1,10 @@
+# Optional edge limits (Apache 2.4+). Requires mod_ratelimit or mod_evasive (distro-dependent).
+# Example: throttle responses to ~400 KiB/s per connection (bandwidth, not request count):
+#
+#   <Location />
+#     SetOutputFilter RATE_LIMIT
+#     SetEnv rate-limit 400
+#   </Location>
+#
+# For request-flood mitigation use mod_evasive, fail2ban, or a reverse proxy (Cloudflare, etc.)
+# alongside SSK_GLOBAL_RL_MAX in the environment for router.php.
