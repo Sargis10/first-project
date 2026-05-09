@@ -6,7 +6,7 @@
     --bg-paper-mid: #ebe6dc;
     --bg-elevated: rgba(255, 254, 250, 0.92);
     --ink-color: #1A1A1A;
-    --muted-color: #717171;
+    --muted-color: #525252;
     --accent-color: #5A5A40;
     --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
     --font-serif: "Playfair Display", serif;
@@ -330,7 +330,7 @@ main {
 }
 
 .catalog-page .catalog-search-field input::placeholder {
-    color: rgba(113, 113, 113, 0.85);
+    color: rgba(82, 82, 82, 0.88);
 }
 
 .catalog-page .catalog-search-field input:hover {

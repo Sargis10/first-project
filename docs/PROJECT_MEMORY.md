@@ -51,6 +51,7 @@ This file is the persistent working memory for this project and should be update
 - Mitigation applied in app code: `includes/header.php` now preloads the background image; `CSS/style.css` uses `scroll` attachment on desktop too to reduce jank.
 - Proxy-aware HTTPS detection added in `includes/db.php` (`HTTP_X_FORWARDED_PROTO`) so session cookies stay `Secure` when TLS is terminated by Apache reverse proxy.
 - User visual feedback after perf tweak: restore the original background visual behavior (desktop `background-attachment: fixed`) because the temporary full-scroll variant made the image composition look enlarged/cropped; keep performance gains from preload + Apache static caching.
+- Follow-up UX tweak: improve perceived cover speed without changing image dimensions by adding native image loading hints (`loading`, `decoding`, `fetchpriority`) in catalog/library/detail templates; improve readability by darkening muted text tone and long description/body text colors.
 - Domain activation request processed: user connected `armenianlibery.duckdns.org` -> `5.223.92.226` and requested full activation without `:8090`.
 - Delivery plan recorded and executed order: (1) update local memory/docs, (2) configure server reverse proxy on port `80`, (3) keep both GitHub remotes (`origin`, `sargis`) in sync, (4) redeploy/verify service.
 - Category i18n backfill CLI: `scripts/backfill-category-translations.php` writes six-language JSON for known genre slugs; docs updated (`README.md`, `database/tables.txt`, `database_schema.sql` column comment).

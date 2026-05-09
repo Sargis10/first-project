@@ -135,6 +135,9 @@ function simpleMarkdown($text) {
             <div style="aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; background: #e5e5e5; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;">
                 <?php if ($book['cover_url']): ?>
                     <img src="<?= htmlspecialchars($book['cover_url']) ?>" 
+                         loading="eager"
+                         decoding="async"
+                         fetchpriority="high"
                          style="width: 100%; height: 100%; object-fit: cover;"
                          onerror="this.onerror=null; this.src='https://placehold.co/400x600/1a1a1a/ffffff?text=<?= urlencode($book['title']) ?>';">
                 <?php else: ?>
@@ -178,7 +181,7 @@ function simpleMarkdown($text) {
 
                 <div>
                     <h3 style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted-color); margin-bottom: 16px;">Description</h3>
-                    <div style="font-size: 16px; color: #4b5563; line-height: 1.6;">
+                    <div style="font-size: 16px; color: #2f2f2f; line-height: 1.6;">
                         <?= $book['description'] ? simpleMarkdown($book['description']) : 'No description provided.' ?>
                     </div>
                 </div>
@@ -220,7 +223,7 @@ function simpleMarkdown($text) {
                     <div style="height: 1px; background: rgba(26,26,26,0.1); width: 100%;"></div>
                     <div>
                         <h3 style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted-color); margin-bottom: 16px;">About the Author</h3>
-                        <div style="font-size: 15px; color: #4b5563; line-height: 1.6; font-style: italic;">
+                        <div style="font-size: 15px; color: #2f2f2f; line-height: 1.6; font-style: italic;">
                             <?= simpleMarkdown($book['author_bio']) ?>
                         </div>
                     </div>

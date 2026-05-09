@@ -160,6 +160,9 @@ function renderBookGrid($books, $emptyMsg) {
                     <button type="submit" style="all: unset; cursor: pointer; display: block; width: 100%; text-align: left; color: inherit;">
                     <div style="aspect-ratio: 2/3; border-radius: 16px; overflow: hidden; background: #f1f5f9; box-shadow: 0 15px 35px -12px rgba(0,0,0,0.15); transition: transform 0.3s; margin-bottom: 20px;">
                         <img src="' . htmlspecialchars($b['cover_url'] ?: '') . '" 
+                             loading="lazy"
+                             decoding="async"
+                             fetchpriority="low"
                              style="width: 100%; height: 100%; object-fit: cover;" 
                              onerror="this.onerror=null; this.src=\'https://placehold.co/400x600/1a1a1a/ffffff?text=' . urlencode($b['title']) . '\';">
                     </div>
