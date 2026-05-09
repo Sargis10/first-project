@@ -3,6 +3,22 @@ require_once __DIR__ . '/db.php';
 // We assume session_start() is called inside db.php already.
 $pageStyles = $pageStyles ?? [];
 $pageScripts = $pageScripts ?? [];
+if (!function_exists('sskAssetHref')) {
+    function sskAssetHref(string $path): string {
+        $resolved = $path;
+        if (!preg_match('/^https?:\/\//', $resolved) && strpos($resolved, '/') !== 0) {
+            $resolved = '/' . ltrim($resolved, '/');
+        }
+        if (preg_match('/^https?:\/\//', $resolved)) {
+            return $resolved;
+        }
+        $assetFile = dirname(__DIR__) . $resolved;
+        if (is_file($assetFile)) {
+            return $resolved . '?v=' . (string) filemtime($assetFile);
+        }
+        return $resolved;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(sskCurrentLang()) ?>">
@@ -11,18 +27,12 @@ $pageScripts = $pageScripts ?? [];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars(t('app.title')) ?></title>
-    <link rel="preload" as="image" href="/assets/images/library-reading-room-bg.webp" fetchpriority="high">
-    <link rel="stylesheet" href="/CSS/style.css">
+    <link rel="preload" as="image" href="<?= htmlspecialchars(sskAssetHref('/assets/images/library-reading-room-bg.webp')) ?>" fetchpriority="high">
+    <link rel="stylesheet" href="<?= htmlspecialchars(sskAssetHref('/CSS/style.css')) ?>">
     <?php foreach ($pageStyles as $stylePath): ?>
-        <?php
-            $resolvedStylePath = $stylePath;
-            if (!preg_match('/^https?:\/\//', $resolvedStylePath) && strpos($resolvedStylePath, '/') !== 0) {
-                $resolvedStylePath = '/' . ltrim($resolvedStylePath, '/');
-            }
-        ?>
-        <link rel="stylesheet" href="<?= htmlspecialchars($resolvedStylePath) ?>">
+        <link rel="stylesheet" href="<?= htmlspecialchars(sskAssetHref((string) $stylePath)) ?>">
     <?php endforeach; ?>
-    <script src="/assets/js/lang-menu.js" defer></script>
+    <script src="<?= htmlspecialchars(sskAssetHref('/assets/js/lang-menu.js')) ?>" defer></script>
 </head>
 
 <body>

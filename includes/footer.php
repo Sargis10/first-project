@@ -54,13 +54,7 @@ $footerAdmin = $footerLoggedIn && function_exists('isAdmin') && isAdmin();
     </footer>
     <?php if (isset($pageScripts) && is_array($pageScripts)): ?>
         <?php foreach ($pageScripts as $scriptPath): ?>
-            <?php
-                $resolvedScriptPath = $scriptPath;
-                if (!preg_match('/^https?:\/\//', $resolvedScriptPath) && strpos($resolvedScriptPath, '/') !== 0) {
-                    $resolvedScriptPath = '/' . ltrim($resolvedScriptPath, '/');
-                }
-            ?>
-            <script src="<?= htmlspecialchars($resolvedScriptPath) ?>"></script>
+            <script src="<?= htmlspecialchars(sskAssetHref((string) $scriptPath)) ?>"></script>
         <?php endforeach; ?>
     <?php endif; ?>
 </body>
