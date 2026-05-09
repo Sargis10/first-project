@@ -46,6 +46,8 @@ This file is the persistent working memory for this project and should be update
 - MySQL/MariaDB server
 
 ## Latest updates (2026-05-09)
+- Domain activation request processed: user connected `armenianlibery.duckdns.org` -> `5.223.92.226` and requested full activation without `:8090`.
+- Delivery plan recorded and executed order: (1) update local memory/docs, (2) configure server reverse proxy on port `80`, (3) keep both GitHub remotes (`origin`, `sargis`) in sync, (4) redeploy/verify service.
 - Category i18n backfill CLI: `scripts/backfill-category-translations.php` writes six-language JSON for known genre slugs; docs updated (`README.md`, `database/tables.txt`, `database_schema.sql` column comment).
 - Catalog search UX: index page has no duplicate H1/subtitle block; only `index.search_label` + search field + category chips. **Site nav** uses `header.site-header` so inner `<header>` elements are not styled with the glass navbar (that had caused a large frosted panel on the catalog).
 - Security hardening: env-based DB credentials, CSRF protection on state-changing forms, stricter session cookie settings, and safer error output.
@@ -79,3 +81,4 @@ This file is the persistent working memory for this project and should be update
 
 ## Next planned step
 - Keep `main` in sync on both GitHub remotes and redeploy the Hetzner unit after material changes.
+- Keep domain proxy (`armenianlibery.duckdns.org` on `:80`) active and mapped to local app service `127.0.0.1:8090`.
