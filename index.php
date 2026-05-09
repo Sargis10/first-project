@@ -60,8 +60,9 @@ $pageScripts = ['assets/js/pages/index.js'];
                         <input type="hidden" name="book_id" value="<?= (int)$book['id'] ?>">
                         <button type="submit" class="card-link">
                             <div class="card-image-wrap">
-                                <?php if ($book['cover_url']): ?>
-                                    <img src="<?= htmlspecialchars($book['cover_url']) ?>"
+                                <?php $cardCover = sskSafePublicCoverPath($book['cover_url'] ?? null); ?>
+                                <?php if ($cardCover !== ''): ?>
+                                    <img src="<?= htmlspecialchars($cardCover) ?>"
                                          alt="Cover"
                                          loading="<?= $index < 4 ? 'eager' : 'lazy' ?>"
                                          decoding="async"

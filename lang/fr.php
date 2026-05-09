@@ -48,6 +48,7 @@ return [
     'auth.no_account' => "Vous n'avez pas de compte ?",
     'auth.register_here' => 'Inscrivez-vous ici',
     'auth.invalid_credentials' => 'E-mail ou mot de passe invalide',
+    'auth.too_many_attempts' => 'Trop de tentatives. Veuillez attendre quelques minutes et réessayer.',
     'auth.invalid_email' => 'Veuillez saisir une adresse e-mail valide.',
     'auth.fill_all_fields' => 'Veuillez remplir tous les champs',
 

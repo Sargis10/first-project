@@ -79,8 +79,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $stmt = $pdo->prepare("DELETE FROM books WHERE id = ? AND user_id = ?");
         $stmt->execute([$book_id, $user_id]);
 
-        if ($book['cover_url'] && file_exists($book['cover_url'])) {
-            unlink($book['cover_url']);
+        $delCover = sskSafePublicCoverPath($book['cover_url'] ?? null);
+        if ($delCover !== '' && file_exists($delCover)) {
+            unlink($delCover);
         }
 
         unset($_SESSION['ssk_view_book_id']);
@@ -137,8 +138,9 @@ function simpleMarkdown($text) {
         <div class="book-details-grid">
             
             <div style="aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; background: #e5e5e5; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;">
-                <?php if ($book['cover_url']): ?>
-                    <img src="<?= htmlspecialchars($book['cover_url']) ?>" 
+                <?php $detailCover = sskSafePublicCoverPath($book['cover_url'] ?? null); ?>
+                <?php if ($detailCover !== ''): ?>
+                    <img src="<?= htmlspecialchars($detailCover) ?>" 
                          loading="eager"
                          decoding="async"
                          fetchpriority="high"

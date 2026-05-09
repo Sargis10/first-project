@@ -48,6 +48,7 @@ return [
     'auth.no_account' => 'Нет аккаунта?',
     'auth.register_here' => 'Зарегистрируйтесь',
     'auth.invalid_credentials' => 'Неверный email или пароль',
+    'auth.too_many_attempts' => 'Слишком много попыток. Подождите несколько минут и попробуйте снова.',
     'auth.invalid_email' => 'Введите корректный адрес электронной почты.',
     'auth.fill_all_fields' => 'Заполните все поля',
 

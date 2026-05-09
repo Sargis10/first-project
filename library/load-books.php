@@ -9,6 +9,14 @@ if (!isLoggedIn()) {
     exit;
 }
 
+if (sskRateLimitExceeded('catalog_api', 180, 60)) {
+    http_response_code(429);
+    header('Retry-After: 60');
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['error' => 'Too many requests']);
+    exit;
+}
+
 $limit = (int)($_GET['limit'] ?? 20);
 $offset = (int)($_GET['offset'] ?? 0);
 $category = trim((string)($_GET['category'] ?? 'all'));
@@ -65,6 +73,7 @@ foreach ($rows as $book) {
         ? sskLower((string)$book['category_slug'])
         : 'uncategorized';
 
+    $safeCover = sskSafePublicCoverPath($book['cover_url'] ?? null);
     $html .= '
         <div class="card-item" 
              data-title="' . htmlspecialchars($title) . '" 
@@ -77,8 +86,8 @@ foreach ($rows as $book) {
                 <button type="submit" class="card-link">
                     <div class="card-image-wrap">
                         ' . (
-                            !empty($book['cover_url'])
-                                ? '<img src="' . htmlspecialchars($book['cover_url']) . '"
+                            $safeCover !== ''
+                                ? '<img src="' . htmlspecialchars($safeCover) . '"
                                      alt="Cover"
                                      loading="lazy"
                                      decoding="async"

@@ -49,6 +49,7 @@ return [
     'auth.no_account' => 'Noch kein Konto?',
     'auth.register_here' => 'Hier registrieren',
     'auth.invalid_credentials' => 'Ungültige E-Mail oder Passwort',
+    'auth.too_many_attempts' => 'Zu viele Versuche. Bitte einige Minuten warten und erneut versuchen.',
     'auth.invalid_email' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
     'auth.fill_all_fields' => 'Bitte alle Felder ausfüllen',
 

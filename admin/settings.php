@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'about_mission',
         'about_vision',
     ];
+    $maxSettingLen = 120000;
     try {
         $pdo->beginTransaction();
         foreach ($_POST['settings'] ?? [] as $key => $value) {
@@ -26,6 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 continue;
             }
             $value = is_string($value) ? $value : '';
+            if (strlen($value) > $maxSettingLen) {
+                $value = substr($value, 0, $maxSettingLen);
+            }
             $stmt = $pdo->prepare("INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?");
             $stmt->execute([$key, $value, $value]);
         }
@@ -52,8 +56,12 @@ $settings = $pdo->query("SELECT * FROM site_settings")->fetchAll(PDO::FETCH_KEY_
         <a href="<?= htmlspecialchars(sskUrl('about')) ?>" class="btn btn-outline" target="_blank">View Live Page →</a>
     </header>
 
+    <?php if ($error): ?>
+        <div style="background: #fef2f2; color: #b91c1c; padding: 16px; border-radius: 8px; margin-bottom: 24px; font-size: 14px; font-weight: 500;"> <?= htmlspecialchars($error) ?> </div>
+    <?php endif; ?>
+
     <?php if($success): ?>
-        <div style="background: #ecfdf5; color: #047857; padding: 16px; border-radius: 8px; margin-bottom: 24px; font-size: 14px; font-weight: 500;"> <?= $success ?> </div>
+        <div style="background: #ecfdf5; color: #047857; padding: 16px; border-radius: 8px; margin-bottom: 24px; font-size: 14px; font-weight: 500;"> <?= htmlspecialchars($success) ?> </div>
     <?php endif; ?>
 
     <form method="POST" style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05);">

@@ -49,6 +49,7 @@ return [
     'auth.no_account' => 'Non hai un account?',
     'auth.register_here' => 'Registrati qui',
     'auth.invalid_credentials' => 'E-mail o password non validi',
+    'auth.too_many_attempts' => 'Troppi tentativi. Attendi alcuni minuti e riprova.',
     'auth.invalid_email' => 'Inserisci un indirizzo e-mail valido.',
     'auth.fill_all_fields' => 'Compila tutti i campi',
 

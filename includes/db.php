@@ -19,7 +19,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 require_once __DIR__ . '/i18n.php';
 require_once __DIR__ . '/category_i18n.php';
 require_once __DIR__ . '/routes.php';
+require_once __DIR__ . '/rate_limit.php';
 sskSetLangFromRequest();
+
+/** Bcrypt hash used only for timing-safe password_verify when the user row is missing or has no hash. */
+const SSK_PASSWORD_PLACEHOLDER_HASH = '$2y$10$jqgm6L4d1U.t3X8Ex8yXb.ekeck1G5/kHGTU/R/WtM2MNrJsG1XLu';
 
 function loadEnvFile($filePath) {
     if (!is_readable($filePath)) {
@@ -357,6 +361,46 @@ function verifyCsrfTokenOrFail() {
     }
 }
 
+/** Keep session role in sync with DB (admin demotion, deleted account). */
+function sskSyncSessionWithDatabase(PDO $pdo): void {
+    if (empty($_SESSION['user_id'])) {
+        return;
+    }
+    $uid = (int)$_SESSION['user_id'];
+    if ($uid <= 0) {
+        unset($_SESSION['user_id'], $_SESSION['role'], $_SESSION['csrf_token']);
+        return;
+    }
+    $stmt = $pdo->prepare('SELECT id, role FROM users WHERE id = ? LIMIT 1');
+    $stmt->execute([$uid]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$row) {
+        unset($_SESSION['user_id'], $_SESSION['role'], $_SESSION['csrf_token']);
+        return;
+    }
+    $_SESSION['role'] = (string)($row['role'] ?? 'user');
+}
+
+/**
+ * Only relative paths under uploads/ (no traversal). Used before emitting cover URLs to HTML.
+ */
+function sskSafePublicCoverPath(?string $path): string {
+    if ($path === null) {
+        return '';
+    }
+    $path = trim($path);
+    if ($path === '' || strlen($path) > 512) {
+        return '';
+    }
+    if (str_contains($path, '..') || str_contains($path, "\0") || str_contains($path, '\\')) {
+        return '';
+    }
+    if (!str_starts_with($path, 'uploads/')) {
+        return '';
+    }
+    return $path;
+}
+
 // Helper to get current user ID
 function currentUserId() {
     return $_SESSION['user_id'] ?? null;
@@ -368,6 +412,9 @@ function isAdmin() {
 }
 
 if (!in_array(PHP_SAPI, ['cli', 'phpdbg'], true)) {
+    if (isset($pdo) && isLoggedIn()) {
+        sskSyncSessionWithDatabase($pdo);
+    }
     sskSendSecurityHeaders();
 }
 ?>

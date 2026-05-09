@@ -74,7 +74,7 @@ if ($book_id) {
     $title = $book['title'];
     $author = $book['author'];
     $description = $book['description'];
-    $cover_url = $book['cover_url'];
+    $cover_url = sskSafePublicCoverPath($book['cover_url'] ?? null);
     $category_id = $book['category_id'];
     $isbn = $book['isbn'] ?? '';
     $publisher = $book['publisher'] ?? '';
@@ -172,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt_fetch = $pdo->prepare("SELECT cover_url FROM books WHERE id = ? AND user_id = ?");
                 $stmt_fetch->execute([$book_id, $user_id]);
                 $old_cover = $stmt_fetch->fetchColumn();
-                $cover_url = $old_cover;
+                $cover_url = sskSafePublicCoverPath($old_cover !== false ? (string)$old_cover : null);
             }
 
             $stmt = $pdo->prepare("UPDATE books SET title=?, author=?, description=?, cover_url=?, category_id=?, isbn=?, publisher=?, publish_year=?, language=?, page_count=?, author_bio=?, format=?, edition=?, updated_at=CURRENT_TIMESTAMP WHERE id=? AND user_id=?");

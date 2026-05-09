@@ -73,6 +73,7 @@ return [
     'auth.no_account' => "Don't have an account?",
     'auth.register_here' => 'Register here',
     'auth.invalid_credentials' => 'Invalid email or password',
+    'auth.too_many_attempts' => 'Too many attempts. Please wait a few minutes and try again.',
     'auth.invalid_email' => 'Please enter a valid email address.',
     'auth.fill_all_fields' => 'Please fill all fields',
 

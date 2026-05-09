@@ -153,13 +153,13 @@ function renderBookGrid($books, $emptyMsg) {
         foreach ($books as $b) {
             echo '
             <div class="book-card" style="position: relative;">
-                <form method="POST" action="<?= htmlspecialchars(sskUrl('read')) ?>" style="margin: 0;">
+                <form method="POST" action="' . htmlspecialchars(sskUrl('read'), ENT_QUOTES, 'UTF-8') . '" style="margin: 0;">
                     <input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrfToken()) . '">
                     <input type="hidden" name="action" value="open_book">
                     <input type="hidden" name="book_id" value="' . (int)$b['id'] . '">
                     <button type="submit" style="all: unset; cursor: pointer; display: block; width: 100%; text-align: left; color: inherit;">
                     <div style="aspect-ratio: 2/3; border-radius: 16px; overflow: hidden; background: #f1f5f9; box-shadow: 0 15px 35px -12px rgba(0,0,0,0.15); transition: transform 0.3s; margin-bottom: 20px;">
-                        <img src="' . htmlspecialchars($b['cover_url'] ?: '') . '" 
+                        <img src="' . htmlspecialchars(sskSafePublicCoverPath($b['cover_url'] ?? null)) . '" 
                              loading="lazy"
                              decoding="async"
                              fetchpriority="low"

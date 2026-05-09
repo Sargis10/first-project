@@ -48,6 +48,7 @@ return [
     'auth.no_account' => 'Չունե՞ք հաշիվ։',
     'auth.register_here' => 'Գրանցվեք այստեղ',
     'auth.invalid_credentials' => 'Սխալ էլ․ հասցե կամ գաղտնաբառ',
+    'auth.too_many_attempts' => 'Չափազանց շատ փորձեր։ Խնդրում ենք մի քանի րոպե սպասել և կրկին փորձել։',
     'auth.invalid_email' => 'Մուտքագրեք վավեր էլ․ հասցե։',
     'auth.fill_all_fields' => 'Լրացրեք բոլոր դաշտերը',
 

@@ -10,6 +10,10 @@ $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verifyCsrfTokenOrFail();
+    if (sskRateLimitExceeded('register', 15, 3600)) {
+        usleep(random_int(100_000, 350_000));
+        $error = t('auth.too_many_attempts');
+    } else {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
 
@@ -42,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } else {
         $error = t('auth.fill_all_fields');
+    }
     }
 }
 ?>

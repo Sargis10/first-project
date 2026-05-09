@@ -10,30 +10,39 @@ $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verifyCsrfTokenOrFail();
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
+    if (sskRateLimitExceeded('login', 25, 900)) {
+        usleep(random_int(100_000, 350_000));
+        $error = t('auth.too_many_attempts');
+    } else {
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
 
-    if (!empty($email) && !empty($password)) {
-        $email = trim((string)$email);
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $error = t('auth.invalid_email');
-        } else {
-            $stmt = $pdo->prepare("SELECT id, password, role FROM users WHERE email = ?");
-            $stmt->execute([$email]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($user && password_verify($password, $user['password'])) {
-                session_regenerate_id(true);
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['role'] = $user['role'] ?? 'user';
-                header('Location: ' . sskUrl('home'));
-                exit;
+        if (!empty($email) && !empty($password)) {
+            $email = trim((string)$email);
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $error = t('auth.invalid_email');
             } else {
+                $stmt = $pdo->prepare("SELECT id, password, role FROM users WHERE email = ?");
+                $stmt->execute([$email]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                $storedHash = ($user && !empty($user['password']))
+                    ? (string)$user['password']
+                    : SSK_PASSWORD_PLACEHOLDER_HASH;
+                $passwordOk = password_verify((string)$password, $storedHash);
+
+                if ($user && $passwordOk) {
+                    session_regenerate_id(true);
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['role'] = $user['role'] ?? 'user';
+                    header('Location: ' . sskUrl('home'));
+                    exit;
+                }
+                usleep(random_int(80_000, 220_000));
                 $error = t('auth.invalid_credentials');
             }
+        } else {
+            $error = t('auth.fill_all_fields');
         }
-    } else {
-        $error = t('auth.fill_all_fields');
     }
 }
 ?>

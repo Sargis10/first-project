@@ -44,6 +44,21 @@ This file is the persistent working memory for this project and should be update
 - Apache or built-in PHP server
 - MySQL/MariaDB server
 
+## Latest updates (2026-05-09) — security hardening pass (rate limits, session sync, covers)
+
+**User request:** Deep security review: assume attackers run many requests and varied techniques; fix what breaks and prevent recurrence.
+
+**Delivered:**
+- **`includes/rate_limit.php`:** per-IP fixed-window limits using `sys_get_temp_dir()/ssk-rate` + `flock`; `sskClientIp()` prefers real client when `REMOTE_ADDR` is loopback (uses `X-Forwarded-For` / `X-Real-IP` first hop).
+- **Login:** after CSRF, max **25** failed attempts per **15 minutes** per IP → `auth.too_many_attempts` (all 6 UI languages); **constant-time** `password_verify` path via `SSK_PASSWORD_PLACEHOLDER_HASH` when user missing; small random `usleep` on failures.
+- **Register:** max **15** posts per **hour** per IP (same throttle helper).
+- **Catalog API** (`library/load-books.php`): max **180** JSON requests per **minute** per IP → **429** + `Retry-After: 60` (mitigates scroll/search abuse).
+- **Session:** `sskSyncSessionWithDatabase()` runs on each web request after DB init if logged in — role matches DB; deleted users lose session keys (admin demotion effective immediately).
+- **Cover URLs:** `sskSafePublicCoverPath()` allowlists only `uploads/…` paths without `..`, `\\`, or NUL; used in catalog cards, load-more HTML, book detail, my-library grid, and safe unlink on delete; **bugfix:** `library/my-library.php` `renderBookGrid` form `action` was broken (literal `<?=` inside string) — now correct `sskUrl('read')` concatenation.
+- **Admin settings:** cap stored value length (**120k** chars) per key; show `$error` with escaping; success message escaped.
+
+---
+
 ## Latest updates (2026-05-09) — opaque URLs + router
 
 **User request (summary):** Reduce fingerprinting in the browser (avoid visible `login.php`, `book-details.php`, etc.); route everything through short paths; keep defense in depth; sync work to **both** GitHub accounts (`origin` Samvel10, `sargis` Sargis10); deploy to server and verify.
