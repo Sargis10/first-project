@@ -152,9 +152,13 @@ function renderBookGrid($books, $emptyMsg) {
         echo '<div class="book-grid">';
         foreach ($books as $b) {
             $myPh = 'https://placehold.co/400x600/1a1a1a/ffffff?text=' . rawurlencode((string)($b['title'] ?? ''));
-            $myCover = sskSafePublicCoverPath($b['cover_url'] ?? null);
-            $myImgSrc = $myCover !== '' ? ('/' . $myCover) : $myPh;
-            $myImgPhAttr = $myCover !== '' ? ' data-ssk-placeholder="' . htmlspecialchars($myPh, ENT_QUOTES, 'UTF-8') . '"' : '';
+            $myImgSrc = sskPublicCoverImgSrc($b['cover_url'] ?? null);
+            if ($myImgSrc === '') {
+                $myImgSrc = $myPh;
+                $myImgPhAttr = '';
+            } else {
+                $myImgPhAttr = ' data-ssk-placeholder="' . htmlspecialchars($myPh, ENT_QUOTES, 'UTF-8') . '"';
+            }
             echo '
             <div class="book-card" style="position: relative;">
                 <form method="POST" action="' . htmlspecialchars(sskUrl('read'), ENT_QUOTES, 'UTF-8') . '" style="margin: 0;">

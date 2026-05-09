@@ -428,10 +428,67 @@ function sskSafePublicCoverPath(?string $path): string {
     return $path;
 }
 
-/** Root-relative URL for <img src> (works on /read, /shelf, etc., not only on /). */
+/**
+ * Allowed remote cover URLs (e.g. Open Library). HTTPS only; http:// normalized to https://.
+ * Rejects javascript:, credentials in URL, and non-hostname hosts.
+ */
+function sskTrustedHttpsCoverUrl(?string $url): string {
+    if ($url === null) {
+        return '';
+    }
+    $url = trim($url);
+    if ($url === '' || strlen($url) > 2048) {
+        return '';
+    }
+    if (str_contains($url, "\0") || str_contains($url, '..')) {
+        return '';
+    }
+    if (preg_match('#^http://#i', $url)) {
+        $url = 'https://' . substr($url, 7);
+    }
+    if (!preg_match('#^https://#i', $url)) {
+        return '';
+    }
+    $parts = parse_url($url);
+    if (!is_array($parts)) {
+        return '';
+    }
+    if (strtolower((string)($parts['scheme'] ?? '')) !== 'https') {
+        return '';
+    }
+    if (array_key_exists('user', $parts) || array_key_exists('pass', $parts)) {
+        return '';
+    }
+    $host = (string)($parts['host'] ?? '');
+    if ($host === '' || !filter_var($host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+        return '';
+    }
+    return $url;
+}
+
+/** Value to keep in DB / forms: local uploads/ path or normalized HTTPS image URL. */
+function sskNormalizeStoredCoverUrl(?string $raw): string {
+    if ($raw === null) {
+        return '';
+    }
+    $raw = trim((string)$raw);
+    if ($raw === '') {
+        return '';
+    }
+    $local = sskSafePublicCoverPath($raw);
+    if ($local !== '') {
+        return $local;
+    }
+    return sskTrustedHttpsCoverUrl($raw);
+}
+
+/** Root-relative /uploads/… or absolute HTTPS URL for <img src>. */
 function sskPublicCoverImgSrc(?string $path): string {
     $safe = sskSafePublicCoverPath($path);
-    return $safe === '' ? '' : '/' . $safe;
+    if ($safe !== '') {
+        return '/' . $safe;
+    }
+    return sskTrustedHttpsCoverUrl($path);
 }
 
 // Helper to get current user ID

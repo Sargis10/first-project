@@ -81,7 +81,7 @@ foreach ($rows as $book) {
         ? sskLower((string)$book['category_slug'])
         : 'uncategorized';
 
-    $safeCover = sskSafePublicCoverPath($book['cover_url'] ?? null);
+    $imgSrc = sskPublicCoverImgSrc($book['cover_url'] ?? null);
     $placeholderUrl = 'https://placehold.co/400x600/1a1a1a/ffffff?text=' . rawurlencode((string)($book['title'] ?? ''));
     $html .= '
         <div class="card-item" 
@@ -95,8 +95,8 @@ foreach ($rows as $book) {
                 <button type="submit" class="card-link">
                     <div class="card-image-wrap">
                         ' . (
-                            $safeCover !== ''
-                                ? '<img src="' . htmlspecialchars('/' . $safeCover) . '"
+                            $imgSrc !== ''
+                                ? '<img src="' . htmlspecialchars($imgSrc) . '"
                                      alt="Cover"
                                      loading="lazy"
                                      decoding="async"
