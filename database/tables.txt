@@ -1,6 +1,8 @@
 SSK Database Mapping (English + Armenian)
 =========================================
 
+This file describes the logical schema. The live database may also receive **automatic migrations** when the app boots (`includes/db.php`) — e.g. adding `role`, `slug`, or `name_i18n` on older snapshots. For a clean install, use `database/database_schema.sql` plus app first run.
+
 Core Connection
 ---------------
 Database name: `ssk`
@@ -81,7 +83,7 @@ CREATE TABLE IF NOT EXISTS books (
     title VARCHAR(255) NOT NULL,
     author VARCHAR(255) NOT NULL,
     description TEXT NULL,
-    cover_url VARCHAR(255) NULL,
+    cover_url VARCHAR(255) NULL,  -- local path uploads/... or vetted https:// image URL (see sskNormalizeStoredCoverUrl in includes/db.php)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     category_id INT NULL,

@@ -1,35 +1,62 @@
-# Project Structure
+# Project structure (quick reference)
 
-This project now uses feature directories as the main structure.
+Feature folders hold PHP pages; **all public HTTP traffic** should go through **`router.php`** at the repo root (see `README.md` §3).
 
-## Directories
+## Root
 
-- `admin/`
-  - `dashboard.php`
-  - `categories.php`
-  - `settings.php`
-- `auth/`
-  - `login.php`
-  - `register.php`
-  - `logout.php`
-- `library/`
-  - `catalog.php`
-  - `my-library.php`
-  - `book-form.php`
-  - `book-details.php`
-  - `stats.php`
-  - `about.php`
-  - `contact.php`
-- `includes/` (shared bootstrap and layout)
-- `assets/css/pages/` (page-level CSS)
-- `assets/js/pages/` (page-level JS)
-- `CSS/` (global stylesheet)
-- `uploads/` (user-uploaded covers)
+- `router.php` — Front controller: legacy 301 redirects, optional global rate limit, dispatches to handlers from `includes/routes.php` (`sskPublicPathHandlers()`).
+- `index.php` — Catalog (home `/`).
 
-## Notes
+## `includes/`
 
-- `scripts/seed.php` — CLI-only; creates the first admin user from env vars.
-- `scripts/backfill-category-translations.php` — CLI-only; fills `categories.name_i18n` for known genre slugs/names (six languages). Safe to re-run; overwrites `name_i18n` (and syncs `name` to English label) only for rows that match its built-in dictionary.
-- Main feature pages are inside `admin/`, `auth/`, and `library/`.
-- The specific legacy root files requested by the user were removed to keep the root cleaner.
-- Authentication pages are now only under `auth/` (no root `login.php`/`logout.php`).
+| File | Role |
+|------|------|
+| `db.php` | PDO, migrations, sessions, CSRF, security headers, cover URL helpers, `sskSyncSessionWithDatabase()` |
+| `routes.php` | `sskRoutes()`, `sskUrl()`, handler map, `sskLegacyRedirects()` |
+| `rate_limit.php` | `sskRateLimitExceeded()`, `sskClientIp()` |
+| `i18n.php` | `t()`, language resolution |
+| `category_i18n.php` | `sskCategoryDisplayName()`, `sskBookCategoryDisplay()`, `sskLower()` |
+| `header.php` / `footer.php` | Layout, `sskAssetHref()`, global + per-page CSS, `ssk-ui.js` |
+
+## `auth/`
+
+- `login.php`, `register.php`, `logout.php` — Public routes `/sign-in`, `/sign-up`, `/sign-out`.
+
+## `library/`
+
+- `book-details.php` — `/read`
+- `book-form.php` — `/write`
+- `load-books.php` — `/list` (JSON for catalog)
+- `my-library.php` — `/shelf`
+- `stats.php` — `/activity` (reading activity + expandable lists)
+- `about.php`, `contact.php` — `/about`, `/contact`
+- `catalog.php` — Thin include of `../index.php` (legacy path support)
+
+## `admin/`
+
+- `dashboard.php` — `/manage`
+- `categories.php` — `/manage/topics`
+- `settings.php` — `/manage/content`
+
+## Front-end assets
+
+- `CSS/style.css` — Global
+- `assets/css/pages/*.css` — Page-specific (e.g. `about.css`, `activity.css`); set `$pageStyles` in PHP before `header.php`
+- `assets/js/ssk-ui.js` — Global UI (CSP-friendly delegated handlers)
+- `assets/js/pages/*.js` — Per-page (e.g. catalog `index.js`)
+- `assets/js/lang-menu.js` — Language dropdown
+
+## `lang/`
+
+- `en.php`, `hy.php`, `ru.php`, `fr.php`, `de.php`, `it.php` — UI strings (including `activity.*`, `nav.*`, etc.)
+
+## Data and tooling
+
+- `uploads/` — Cover files; `.htaccess` limits executable types under Apache
+- `scripts/seed.php` — CLI admin seed (env vars)
+- `scripts/backfill-category-translations.php` — CLI category `name_i18n` fill
+- `database/database_schema.sql`, `database/tables.txt` — Schema reference
+
+## `deploy/`
+
+- Example reverse-proxy snippets for extra rate limiting (optional; not required for app boot)

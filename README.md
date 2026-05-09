@@ -1,359 +1,246 @@
-# Libris (SSK) - Full Project Documentation
+# Libris (SSK) — Project documentation
 
-Libris is a PHP + MySQL book-library management system with role-based access control, admin analytics, user reading tracking, category management, and configurable site content.
+Libris is a PHP + MySQL book-library application: catalog, personal reading states, favorites, multilingual UI (six languages), and an admin area for categories and site content.
 
-This document is the main technical guide for developers, operators, and maintainers.
-
-## 1) Project Overview
-
-### Goals
-- Manage a catalog of books with rich metadata.
-- Let users track their reading lifecycle: `want_to_read`, `reading`, `read`.
-- Support favorites and personal dashboards.
-- Provide an admin control panel with metrics and settings.
-
-### Tech Stack
-- Backend: PHP (plain PHP, no framework)
-- Database: MySQL / MariaDB
-- Frontend: Server-rendered PHP templates + CSS + vanilla JavaScript
-- Charts: Chart.js via CDN for admin analytics
-
-### Current Architecture Style
-- Feature-based folders:
-  - `admin/`
-  - `auth/`
-  - `library/`
-  - `scripts/`
-  - `database/`
-  - `docs/`
-- Shared components:
-  - `includes/db.php` (bootstrapping + DB + helpers)
-  - `includes/header.php` / `includes/footer.php`
+This file is the main guide for developers and operators.
 
 ---
 
-## 2) Directory Layout
+## 1) Goals and stack
+
+**Goals**
+
+- Rich book metadata and cover handling (local uploads + vetted HTTPS URLs).
+- Per-user reading lifecycle: `want_to_read`, `reading`, `read`, plus favorites.
+- Opaque public URLs (no `.php` in the address bar) via a single front controller.
+- Defense in depth: CSRF, rate limits, CSP, hardened sessions, safe uploads.
+
+**Stack**
+
+- PHP (no framework), MySQL/MariaDB
+- Server-rendered templates + `CSS/style.css` + page CSS under `assets/css/pages/`
+- Vanilla JS: `assets/js/ssk-ui.js` (global behaviors), `assets/js/pages/*` (per-page)
+- Admin charts: Chart.js from jsDelivr (allowed in CSP)
+
+---
+
+## 2) Directory layout
 
 ```text
-Booking center(SSK)/
-  admin/
-    dashboard.php
-    categories.php
-    settings.php
-    index.php
-  auth/
-    login.php
-    register.php
-    logout.php
-    index.php
-  library/
-    catalog.php
-    my-library.php
-    book-form.php
-    book-details.php
-    stats.php
-    about.php
-    contact.php
-    index.php
-  assets/
-    css/pages/
-    js/pages/
-  CSS/
-    style.css
+project root/
+  router.php                 # Front controller (required for php -S and typical prod PHP process)
+  index.php                  # Authenticated catalog (home)
+  admin/                     # Dashboard, categories, settings
+  auth/                      # login, register, logout
+  library/                   # book UI, about, contact, stats, load-books API script
   includes/
-    db.php
-    header.php
-    footer.php
-  scripts/
-    seed.php
-    backfill-category-translations.php
+    db.php                   # Env, PDO, migrations, security headers, CSRF, cover URL helpers
+    routes.php               # sskRoutes(), sskUrl(), path → script map, legacy redirects
+    header.php / footer.php  # Layout; sskAssetHref() for cache-busted assets
+    i18n.php                 # UI strings (lang/*.php)
+    category_i18n.php        # Localized category names from name_i18n JSON
+    rate_limit.php           # Fixed-window limits (file + flock)
+  lang/                      # en, hy, ru, fr, de, it
+  assets/
+    css/pages/               # e.g. about.css, activity.css
+    js/                      # ssk-ui.js, lang-menu.js, pages/*.js
+    images/
+  CSS/style.css              # Global styles
+  uploads/                   # Cover files (+ .htaccess to block script execution)
+  scripts/                   # seed.php, backfill-category-translations.php
   database/
-    database_schema.sql
-    tables.txt
+    database_schema.sql      # Reference schema (app also auto-creates/migrates via db.php)
+    tables.txt               # Human-readable table notes
+  deploy/                    # Optional reverse-proxy rate-limit examples
   docs/
-    PROJECT_MEMORY.md
-    STRUCTURE.md
-  index.php
-  uploads/
+    PROJECT_MEMORY.md        # Changelog-style decisions and deploy notes
+    STRUCTURE.md             # Short structure reference
 ```
 
-### Why this structure
-- Reduces root clutter.
-- Improves discoverability of business logic.
-- Makes role/function boundaries obvious (`admin`, `auth`, `library`).
-- Simplifies onboarding for new developers.
+---
+
+## 3) HTTP entry and routing
+
+**Public entry** is always through **`router.php`**:
+
+- Built-in server:  
+  `php -S 127.0.0.1:8080 -t /path/to/project /path/to/project/router.php`
+- Production: run the equivalent (systemd unit, etc.) so dynamic requests hit `router.php`; static files are served from the project root as usual.
+
+**Opaque paths** (user-visible) are defined in `includes/routes.php`. Use **`sskUrl('key')`** in PHP and links/forms — never hard-code legacy `.php` URLs for new work.
+
+| Route key        | Path              | Script (internal)              |
+|------------------|-------------------|--------------------------------|
+| `home`           | `/`               | `index.php`                    |
+| `sign_in`        | `/sign-in`        | `auth/login.php`               |
+| `sign_up`        | `/sign-up`        | `auth/register.php`            |
+| `sign_out`       | `/sign-out`       | `auth/logout.php`              |
+| `about`          | `/about`          | `library/about.php`            |
+| `contact`        | `/contact`        | `library/contact.php`          |
+| `shelf`          | `/shelf`          | `library/my-library.php`       |
+| `activity`       | `/activity`       | `library/stats.php`            |
+| `read`           | `/read`           | `library/book-details.php`     |
+| `write`          | `/write`          | `library/book-form.php`        |
+| `list`           | `/list`           | `library/load-books.php` (JSON)|
+| `manage`         | `/manage`         | `admin/dashboard.php`          |
+| `manage_topics`  | `/manage/topics`  | `admin/categories.php`         |
+| `manage_content` | `/manage/content`| `admin/settings.php`           |
+
+**Legacy URLs** (`/auth/login.php`, `/library/book-details.php`, …) return **301** to the opaque path; see `sskLegacyRedirects()`.
+
+**Book detail / edit IDs** are not exposed as numeric query parameters after navigation: CSRF POST handoff stores `ssk_view_book_id` / `ssk_edit_book_id` in the session (same pattern as before routing).
+
+**Catalog infinite scroll** fetches **`/list`** (not `library/load-books.php` in the browser).
 
 ---
 
-## 3) Functional Modules
+## 4) Functional modules
 
-### Authentication (`auth/`)
-- `auth/login.php`: email/password sign-in, session creation.
-- `auth/register.php`: user registration with validation and hashing.
-- `auth/logout.php`: session destruction and redirect.
+**Auth (`auth/`)** — Login and register validate CSRF; login uses per-IP rate limiting; `session_regenerate_id(true)` on success; password policy on register (see i18n).
 
-### Public/Main Catalog
-- `index.php`: global library catalog; requires authenticated user.
-- Search and category filter handled client-side.
+**Catalog (`index.php`)** — Requires login; search/category filtering with server-side pagination via `/list`.
 
-### User Library (`library/`)
-- `library/my-library.php`: tabbed personal view:
-  - uploads
-  - favorites
-  - reading
-  - want-to-read
-  - completed
-- `library/book-details.php`: per-book details, status/favorite toggles.
-- `library/book-form.php`: add/edit book form for admin.
-- `library/stats.php`: reading insight cards + genre distribution.
-- `library/about.php`: content page driven by DB settings.
-- `library/contact.php`: multilingual contact page (hero, channels, checklist, shortcuts); inbox from `CONTACT_EMAIL` env or placeholder.
+**User library (`library/my-library.php`, route `shelf`)** — Tabs: uploads, favorites, reading, wishlist, completed.
 
-### Admin (`admin/`)
-- `admin/dashboard.php`: high-level metrics, charts, recent books/users.
-- `admin/categories.php`: CRUD-like management for categories.
-- `admin/settings.php`: editable `site_settings` values.
+**Book detail (`library/book-details.php`, `read`)** — Status/favorite toggles with allowlisted values.
 
-### Data/Bootstrap (`includes/`)
-- `includes/db.php`:
-  - starts session
-  - connects to DB
-  - auto-creates DB/tables if missing
-  - applies safety migrations for legacy snapshots
-  - exposes helpers:
-    - `isLoggedIn()`
-    - `currentUserId()`
-    - `isAdmin()`
+**Book form (`library/book-form.php`, `write`)** — Create/edit; edits are scoped to `books.user_id = current user` (non-admin owners); uploads validated (MIME, size, `uploads/` only).
+
+**Activity (`library/stats.php`, `activity`)** — Logged-in only: expandable sections for finished / reading / wishlist with full book grids; top genres from finished books; opens book via same CSRF POST as catalog.
+
+**About / Contact** — About uses `site_settings`; contact uses `CONTACT_EMAIL` (see below).
+
+**Admin (`admin/`)** — Metrics dashboard, category CRUD with `name_i18n`, whitelisted `site_settings` keys.
 
 ---
 
-## 4) Routing and Access Rules
+## 5) Database
 
-### Main route groups
-- `/auth/*` -> auth pages
-- `/admin/*` -> admin-only pages
-- `/library/*` -> authenticated user pages
-- `/index.php` -> authenticated catalog page
+Canonical DDL: `database/database_schema.sql` and **`database/tables.txt`** (narrative).
 
-### Book pages and privacy-friendly URLs
-- `/library/book-details.php` and `/library/book-form.php` intentionally avoid `?id=` query strings in the address bar after navigation.
-- Opening a book or starting an edit uses a CSRF-protected POST; the active numeric id is kept in the session (`ssk_view_book_id`, `ssk_edit_book_id`). Direct GET access without a session context redirects back to the catalog.
+**Tables:** `users`, `categories` (with `name_i18n` JSON), `books`, `user_books`, `site_settings`.
 
-### Access control behavior
-- Guest user:
-  - can access login/register
-  - is redirected from protected pages to `/auth/login.php`
-- Authenticated regular user:
-  - can browse catalog, personal library, stats, about
-  - cannot access admin pages
-- Admin user:
-  - full access including admin dashboard/settings/categories and book form
+**`books.cover_url`:** May store a path under `uploads/…` or a **normalized HTTPS** URL accepted by `sskNormalizeStoredCoverUrl()` / `sskTrustedHttpsCoverUrl()` in `includes/db.php` (e.g. Open Library). Display uses `sskPublicCoverImgSrc()`.
 
----
+**Category i18n:** Six JSON keys `en`, `hy`, `ru`, `fr`, `de`, `it` in one column. Runtime helpers: `includes/category_i18n.php`.
 
-## 5) Database Documentation
-
-Canonical SQL is in:
-- `database/database_schema.sql`
-- `database/tables.txt` (human-readable explanations)
-
-### Tables
-- `users`
-  - auth + role (`user`/`admin`)
-- `categories`
-  - category dictionary (`id`, `name`, `slug`, `name_i18n`)
-- `books`
-  - book entity + metadata + ownership (`user_id`)
-- `user_books`
-  - many-to-many relation between users and books for status/favorite
-- `site_settings`
-  - key/value storage for About page content
-
-### Key Relations
-- `books.user_id -> users.id` (CASCADE on delete)
-- `books.category_id -> categories.id` (SET NULL on delete)
-- `user_books.user_id -> users.id` (CASCADE)
-- `user_books.book_id -> books.id` (CASCADE)
-- Unique logical pair: `(user_id, book_id)` in `user_books`
-
-### Categories: six languages vs database columns
-
-The UI supports six languages (`en`, `hy`, `ru`, `fr`, `de`, `it`). Category labels are **not** stored as six separate MySQL columns. They are stored in **one** column, `categories.name_i18n`, as **UTF-8 JSON** with exactly these keys:
-
-| JSON key | Meaning |
-|----------|---------|
-| `en` | English label |
-| `hy` | Armenian |
-| `ru` | Russian |
-| `fr` | French |
-| `de` | German |
-| `it` | Italian |
-
-When an admin saves **Կատեգորիաներ / Categories**, the form posts `name_i18n[en]`, `name_i18n[hy]`, … PHP builds one JSON string and executes `UPDATE categories SET name = ?, slug = ?, name_i18n = ? WHERE id = ?`. The `name` column stays the canonical English string for uniqueness checks and sorting; the JSON holds per-language display strings.
-
-At runtime, `includes/category_i18n.php` (`sskCategoryDisplayName`, `sskBookCategoryDisplay`) chooses the string for the active session language and falls back to English (then `name`) when a translation is empty.
-
-**Bulk fill** the built-in genre names (Business, Fantasy, History, Mystery, Romance, Science Fiction and common slug variants) in all six languages:
+**Bulk fill default genre translations:**
 
 ```bash
-cd "Booking center(SSK)"
 php scripts/backfill-category-translations.php
 ```
 
-The script only updates rows it recognizes (by `slug` or English `name`); it prints `Skip` lines for anything else so you can add those manually in the admin UI.
-
 ---
 
-## 6) Setup Guide (Local)
+## 6) Setup (local)
 
-### Prerequisites
-- PHP 8.x with `php-mysql`
-- MySQL Server (or MariaDB)
-- Apache or PHP built-in server
+**Prerequisites**
 
-### Database setup
+- PHP 8.x with `pdo_mysql`
+- **Recommended:** `php-mbstring` (Unicode slugs/search; without it, ASCII fallbacks apply in `category_i18n.php`)
+- MySQL or MariaDB
+
+**Database**
+
 ```bash
-cd "Booking center(SSK)"
 sudo mysql < database/database_schema.sql
 ```
 
-### App DB user (example)
+App user (example):
+
 ```sql
 CREATE USER IF NOT EXISTS 'ssk_app'@'127.0.0.1' IDENTIFIED BY '<strong-password>';
 GRANT ALL PRIVILEGES ON ssk.* TO 'ssk_app'@'127.0.0.1';
 FLUSH PRIVILEGES;
 ```
 
-### Seed admin (secure mode)
+**Environment (`.env`, not committed)**
+
+- `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` (optional: `DB_PASSWORD_FALLBACKS`)
+- Optional: `CONTACT_EMAIL` for the contact page / `mailto:`
+- Optional tuning: `SSK_GLOBAL_RL_MAX` (default `480`), `SSK_GLOBAL_RL_WINDOW` seconds (default `60`) — global request cap in `router.php`; set `SSK_GLOBAL_RL_MAX=0` to disable.
+
+**Seed admin**
+
 ```bash
 SEED_ADMIN_EMAIL="admin@example.com" \
 SEED_ADMIN_PASSWORD="change-this-password" \
 php scripts/seed.php
 ```
 
-### Optional: six-language labels for default genres
-After categories exist in MySQL (from normal use or imports), you can push curated translations into `name_i18n`:
+**Run**
 
 ```bash
-php scripts/backfill-category-translations.php
+php -S 127.0.0.1:8080 -t . router.php
 ```
 
-Requires the same `.env` / DB credentials as the web app (`includes/db.php`).
-
-### Run app
-```bash
-php -S 127.0.0.1:8080
-```
-
-Open:
-- `http://127.0.0.1:8080/`
+Open `http://127.0.0.1:8080/` (redirects unauthenticated users to `/sign-in`).
 
 ---
 
-## 7) Configuration Notes
+## 7) Security (current)
 
-Runtime DB configuration comes from environment variables (`.env` for local dev):
-- `DB_HOST`
-- `DB_NAME`
-- `DB_USER`
-- `DB_PASSWORD`
-- Optional: `DB_PASSWORD_FALLBACKS` (comma-separated)
+- **Headers:** `sskSendSecurityHeaders()` — CSP with per-request **`sskCspNonce()`**; `script-src` allows `'self'`, nonce, and `https://cdn.jsdelivr.net`; `img-src` includes `https:` (covers, placeholders) and `blob:` where needed; `style-src` still allows `'unsafe-inline'` until CSS is fully externalized.
+- **CSRF** on state-changing forms; `verifyCsrfTokenOrFail()` where required.
+- **Session:** cookie `Secure` when HTTPS (including behind `X-Forwarded-Proto`); `HttpOnly`, `SameSite=Lax`; sync with DB each request via `sskSyncSessionWithDatabase()`.
+- **Auth rate limits:** login (per IP), register (per IP); see `includes/rate_limit.php`.
+- **Catalog API (`/list`):** per-user and per-IP buckets to reduce abuse behind NAT (see `library/load-books.php`).
+- **Global router cap:** `router.php` optional env limits above.
+- **Covers:** `sskSafePublicCoverPath()` for local files; trusted HTTPS only for remote; upload pipeline uses `finfo`, size cap, `is_uploaded_file`.
+- **`uploads/.htaccess`:** blocks execution of script extensions when served by Apache.
 
-### Recommendation
-Keep `.env` out of git and rotate DB credentials regularly.
-
-Optional public inbox for the Contact page:
-
-- `CONTACT_EMAIL` — shown on `/library/contact.php` and used in the `mailto:` link (defaults to `support@libris.local` if unset).
+Further edge tuning: see `deploy/nginx-limit-req.conf.example` and `deploy/apache-mod-ratelimit.conf.example`.
 
 ---
 
-## 8) Security Notes
+## 8) Assets and i18n
 
-### What is already done
-- Password hashing via `password_hash()`
-- Password verification via `password_verify()`
-- Prepared statements for queries
-- Basic role checks using session role
-- Session cookie hardening (`HttpOnly`, `SameSite`, strict mode)
-- CSRF protection for state-changing forms
-
-### Gaps to improve
-- No brute-force/rate-limit protection on auth
-- No centralized input validation layer
-- Inline styles/scripts still exist in some templates
+- Global + page CSS; **`sskAssetHref()`** appends `?v=filemtime` for cache busting.
+- **`assets/js/ssk-ui.js`:** delegated behaviors (`data-ssk-placeholder`, confirmations, autosubmit) — avoids inline event handlers for CSP.
+- Languages: `lang/*.php`; picker in header; category display follows active UI language.
 
 ---
 
-## 9) Assets and Frontend Organization
+## 9) Maintenance patterns
 
-- Global style: `CSS/style.css`
-- Page-specific style: `assets/css/pages/*`
-- Page-specific JS: `assets/js/pages/*`
-- Shared layout wrapper: header/footer includes
+**New public page**
 
-Current refactor status:
-- major inline `<script>`/`<style>` blocks already extracted
-- remaining inline style attributes can still be migrated further
+1. Add script under `admin/`, `auth/`, or `library/`.
+2. Register path in `sskPublicPathHandlers()` and a stable key in `sskRoutes()` / `sskUrl()`.
+3. Add legacy mapping in `sskLegacyRedirects()` if replacing an old `.php` URL.
+4. Guard with `isLoggedIn()` or `isAdmin()` as appropriate.
 
----
+**Schema change**
 
-## 10) Common Maintenance Tasks
-
-### Add a new admin page
-1. Create `admin/<page>.php`
-2. Require `includes/db.php`
-3. Guard with `isAdmin()`
-4. Add nav link if needed in `includes/header.php`
-
-### Add a new user page
-1. Create under `library/`
-2. Guard with `isLoggedIn()`
-3. Add route link in header/user dashboard as needed
-
-### Add DB field safely
-1. Update `database/database_schema.sql`
-2. Add migration logic in `includes/db.php` (`columnExists` check + ALTER)
-3. Update form/view pages
+1. Update `database/database_schema.sql` and `database/tables.txt`.
+2. Add idempotent migration in `includes/db.php` (`columnExists` / similar).
 
 ---
 
-## 11) Troubleshooting
+## 10) Troubleshooting
 
-### `Forbidden` on phpMyAdmin
-- Ensure package installed and Apache config enabled.
-- Verify `http://localhost/phpmyadmin/` responds `200`.
-
-### `Access denied for user root@localhost`
-- Ubuntu often uses socket auth for root.
-- Use app user (recommended) for web app connections.
-
-### Page redirects unexpectedly
-- Usually auth guard behavior:
-  - guest -> `/auth/login.php`
-  - non-admin -> `/index.php` on admin pages
-
-### Missing images
-- Check files in `uploads/`
-- Verify relative paths and file permissions
+- **Redirect to sign-in:** expected for protected routes when logged out.
+- **403 invalid CSRF:** refresh page and retry.
+- **429 on catalog:** rate limit triggered; wait or adjust limits in dev only.
+- **mb_strtolower errors on server:** install `php-mbstring` or rely on fallbacks (reduced Unicode behavior).
+- **Covers broken:** check `uploads/` permissions and that stored paths are root-relative `uploads/…` or allowed HTTPS URLs.
 
 ---
 
-## 12) Documentation Map
+## 11) Documentation map
 
-- Main guide: `README.md` (this file)
-- Structure quick-reference: `docs/STRUCTURE.md`
-- Project memory/state: `docs/PROJECT_MEMORY.md`
-- DB SQL + table notes:
-  - `database/database_schema.sql`
-  - `database/tables.txt`
+| File | Purpose |
+|------|---------|
+| `README.md` | This guide |
+| `docs/STRUCTURE.md` | Compact tree + scripts |
+| `docs/PROJECT_MEMORY.md` | Decisions, incidents, deploy checklist |
+| `database/database_schema.sql` | SQL reference |
+| `database/tables.txt` | Table-by-table notes |
 
 ---
 
-## 13) Current Known Improvements Backlog
+## 12) Backlog (optional)
 
-- Extract remaining inline style attributes to CSS modules.
-- Add CSRF protection.
-- Move secrets to env-based configuration.
-- Add automated tests (integration + route smoke tests).
-- Add CI workflow for lint + basic PHP syntax checks.
+- Further reduce `'unsafe-inline'` in CSP by moving remaining inline styles to CSS.
+- Automated tests (routing smoke, auth, catalog API).
+- CI: `php -l` on changed files.

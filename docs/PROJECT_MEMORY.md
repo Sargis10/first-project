@@ -44,6 +44,19 @@ This file is the persistent working memory for this project and should be update
 - Apache or built-in PHP server
 - MySQL/MariaDB server
 
+## Latest updates (2026-05-09) — documentation sync (README, STRUCTURE, tables)
+
+**User request:** Refresh all documentation to match the current codebase (opaque routing, security, `/activity`, `/list`, env tuning, etc.) and keep Git + server deploy in sync.
+
+**Delivered:**
+- **`README.md`:** Rewritten as the single authoritative guide: `router.php` entry, full `sskUrl` route table, functional modules with public paths, DB/cover URL notes, local run command with router, env vars (`DB_*`, `CONTACT_EMAIL`, `SSK_GLOBAL_RL_*`), security summary (CSP, CSRF, rate limits, uploads), troubleshooting, doc map.
+- **`docs/STRUCTURE.md`:** Updated tree: `includes/*` helpers, `lang/`, assets, `deploy/`, route ↔ script mapping at a glance.
+- **`database/tables.txt`:** Note on `db.php` migrations + comment on `cover_url` semantics.
+
+**Deploy:** Commit to `main`, push `origin` + `sargis`; on server `git pull` under `/opt/libery-from-practic`, `systemctl restart ssk-app`.
+
+---
+
 ## Latest updates (2026-05-09) — `/activity` reading dashboard (expandable lists)
 
 **User request (summary):** The `/activity` page (`library/stats.php`) should show more than aggregate counts: each bucket (finished / reading / wishlist) should expand to a **full book grid** (cover, title, author, category) with polished layout; keep **session-only access** and **CSRF** on book open actions.

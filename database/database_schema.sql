@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS books (
     title VARCHAR(255) NOT NULL,
     author VARCHAR(255) NOT NULL,
     description TEXT NULL,
-    cover_url VARCHAR(255) NULL,
+    cover_url VARCHAR(255) NULL COMMENT 'Local uploads/... path or vetted https:// URL (see sskNormalizeStoredCoverUrl in includes/db.php)',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     category_id INT NULL,
