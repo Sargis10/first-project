@@ -6,90 +6,165 @@ if (!isLoggedIn()) {
     exit;
 }
 
-$user_id = currentUserId();
+/**
+ * @param array<int, array<string, mixed>> $books
+ */
+function activity_render_book_grid(array $books): void {
+    echo '<div class="activity-book-grid">';
+    foreach ($books as $b) {
+        $ph = 'https://placehold.co/400x600/1a1a1a/ffffff?text=' . rawurlencode((string)($b['title'] ?? ''));
+        $src = sskPublicCoverImgSrc($b['cover_url'] ?? null);
+        $phAttr = '';
+        if ($src === '') {
+            $src = $ph;
+        } else {
+            $phAttr = ' data-ssk-placeholder="' . htmlspecialchars($ph, ENT_QUOTES, 'UTF-8') . '"';
+        }
+        $alt = htmlspecialchars((string)($b['title'] ?? ''), ENT_QUOTES, 'UTF-8');
+        echo '<div class="activity-book-card">';
+        echo '<form method="POST" action="' . htmlspecialchars(sskUrl('read'), ENT_QUOTES, 'UTF-8') . '" style="margin:0;">';
+        echo '<input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrfToken()) . '">';
+        echo '<input type="hidden" name="action" value="open_book">';
+        echo '<input type="hidden" name="book_id" value="' . (int)$b['id'] . '">';
+        echo '<button type="submit" class="activity-book-hit">';
+        echo '<div class="activity-book-card__cover"><img src="' . htmlspecialchars($src) . '" alt="' . $alt . '" loading="lazy" decoding="async"' . $phAttr . '></div>';
+        echo '<div class="activity-book-card__meta">' . htmlspecialchars(sskBookCategoryDisplay($b)) . '</div>';
+        echo '<div class="activity-book-card__title">' . htmlspecialchars((string)($b['title'] ?? '')) . '</div>';
+        echo '<div class="activity-book-card__author">' . htmlspecialchars((string)($b['author'] ?? '')) . '</div>';
+        echo '</button></form></div>';
+    }
+    echo '</div>';
+}
 
-// Query for favorite categories (Read the most)
+$user_id = (int)currentUserId();
+
+$listSql = "
+    SELECT books.*, categories.name as category_name, categories.slug as category_slug,
+           categories.name_i18n as category_name_i18n
+    FROM user_books ub
+    JOIN books ON ub.book_id = books.id
+    LEFT JOIN categories ON books.category_id = categories.id
+    WHERE ub.user_id = ? AND ub.status = ?
+    ORDER BY ub.updated_at DESC, books.title ASC
+";
+
+$listStmt = $pdo->prepare($listSql);
+$listStmt->execute([$user_id, 'read']);
+$books_read = $listStmt->fetchAll(PDO::FETCH_ASSOC);
+$listStmt->execute([$user_id, 'reading']);
+$books_reading = $listStmt->fetchAll(PDO::FETCH_ASSOC);
+$listStmt->execute([$user_id, 'want_to_read']);
+$books_want = $listStmt->fetchAll(PDO::FETCH_ASSOC);
+
+$n_read = count($books_read);
+$n_reading = count($books_reading);
+$n_want = count($books_want);
+
 $stats_stmt = $pdo->prepare("
-    SELECT categories.name, categories.name_i18n, COUNT(*) as count 
-    FROM user_books 
-    JOIN books ON user_books.book_id = books.id 
-    JOIN categories ON books.category_id = categories.id 
+    SELECT categories.name, categories.name_i18n, COUNT(*) as count
+    FROM user_books
+    JOIN books ON user_books.book_id = books.id
+    JOIN categories ON books.category_id = categories.id
     WHERE user_books.user_id = ? AND user_books.status = 'read'
-    GROUP BY categories.id 
-    ORDER BY count DESC 
+    GROUP BY categories.id
+    ORDER BY count DESC
     LIMIT 3
 ");
 $stats_stmt->execute([$user_id]);
 $fav_categories = $stats_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get reading summary
-$summary_stmt = $pdo->prepare("
-    SELECT 
-        SUM(CASE WHEN status = 'read' THEN 1 ELSE 0 END) as read_count,
-        SUM(CASE WHEN status = 'reading' THEN 1 ELSE 0 END) as reading_count,
-        SUM(CASE WHEN status = 'want_to_read' THEN 1 ELSE 0 END) as want_count
-    FROM user_books 
-    WHERE user_id = ?
-");
-$summary_stmt->execute([$user_id]);
-$summary = $summary_stmt->fetch(PDO::FETCH_ASSOC);
-
+$pageStyles = ['assets/css/pages/activity.css'];
 ?>
 <?php include __DIR__ . '/../includes/header.php'; ?>
 
-<main class="container" style="max-width: 900px; padding: 60px 24px;">
-    <div style="margin-bottom: 48px; text-align: center;">
-        <h1 style="font-size: 42px; font-family: var(--font-serif); margin-bottom: 12px;">Your Reading Insights</h1>
-        <p style="color: var(--muted-color); font-size: 18px;">Track your journey through the world of books.</p>
+<main class="container activity-page" style="max-width: 960px;">
+    <div class="activity-hero">
+        <h1><?= htmlspecialchars(t('activity.title')) ?></h1>
+        <p><?= htmlspecialchars(t('activity.subtitle')) ?></p>
     </div>
 
-    <!-- SUMMARY CARDS -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 48px;">
-        <div style="background: white; padding: 32px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; border: 1px solid rgba(0,0,0,0.05);">
-            <div style="color: var(--muted-color); font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">Completed</div>
-            <div style="font-size: 36px; font-weight: 700; color: var(--accent-color);"><?= $summary['read_count'] ?: 0 ?></div>
-        </div>
-        <div style="background: white; padding: 32px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; border: 1px solid rgba(0,0,0,0.05);">
-            <div style="color: var(--muted-color); font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">Currently Reading</div>
-            <div style="font-size: 36px; font-weight: 700; color: #3b82f6;"><?= $summary['reading_count'] ?: 0 ?></div>
-        </div>
-        <div style="background: white; padding: 32px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; border: 1px solid rgba(0,0,0,0.05);">
-            <div style="color: var(--muted-color); font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">Wishlist</div>
-            <div style="font-size: 36px; font-weight: 700; color: #8b5cf6;"><?= $summary['want_count'] ?: 0 ?></div>
-        </div>
-    </div>
-
-    <!-- MOST READ CATEGORIES -->
-    <section style="background: #1A1A1A; color: white; border-radius: 24px; padding: 48px; position: relative; overflow: hidden;">
-        <div style="position: relative; z-index: 2;">
-            <h2 style="font-size: 28px; font-family: var(--font-serif); margin-bottom: 32px;">Top Genres Read</h2>
-            
-            <?php if (empty($fav_categories)): ?>
-                <p style="color: rgba(255,255,255,0.6);">Mark some books as "Read" to see your genre distribution!</p>
-            <?php else: ?>
-                <div style="display: flex; flex-direction: column; gap: 24px;">
-                    <?php foreach($fav_categories as $index => $cat): ?>
-                        <div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; font-weight: 500;">
-                                <span><?= htmlspecialchars(sskCategoryDisplayName(['name' => $cat['name'], 'name_i18n' => $cat['name_i18n'] ?? null])) ?></span>
-                                <span style="opacity: 0.6;"><?= $cat['count'] ?> books</span>
-                            </div>
-                            <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; width: 100%;">
-                                <?php 
-                                    $max = $fav_categories[0]['count'];
-                                    $percent = ($cat['count'] / $max) * 100;
-                                ?>
-                                <div style="height: 100%; width: <?= $percent ?>%; background: var(--accent-color); border-radius: 4px;"></div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
+    <div class="activity-panels">
+        <details class="activity-panel activity-panel--read" id="activity-read">
+            <summary>
+                <div class="activity-panel__lead">
+                    <div class="activity-panel__label"><?= htmlspecialchars(t('activity.completed')) ?></div>
+                    <div class="activity-panel__count"><?= (int)$n_read ?></div>
+                    <div class="activity-panel__hint"><?= htmlspecialchars(t('activity.expand_hint')) ?></div>
                 </div>
-            <?php endif; ?>
-        </div>
-        <!-- Decorative subtle element -->
-        <div style="position: absolute; right: -50px; bottom: -50px; width: 200px; height: 200px; background: var(--accent-color); filter: blur(100px); opacity: 0.2;"></div>
-    </section>
+                <span class="activity-chevron" aria-hidden="true"></span>
+            </summary>
+            <div class="activity-panel__body">
+                <?php if ($n_read === 0): ?>
+                    <p class="activity-empty"><?= htmlspecialchars(t('activity.empty_completed')) ?></p>
+                <?php else: ?>
+                    <?php activity_render_book_grid($books_read); ?>
+                <?php endif; ?>
+            </div>
+        </details>
 
+        <details class="activity-panel activity-panel--reading" id="activity-reading">
+            <summary>
+                <div class="activity-panel__lead">
+                    <div class="activity-panel__label"><?= htmlspecialchars(t('activity.reading')) ?></div>
+                    <div class="activity-panel__count"><?= (int)$n_reading ?></div>
+                    <div class="activity-panel__hint"><?= htmlspecialchars(t('activity.expand_hint')) ?></div>
+                </div>
+                <span class="activity-chevron" aria-hidden="true"></span>
+            </summary>
+            <div class="activity-panel__body">
+                <?php if ($n_reading === 0): ?>
+                    <p class="activity-empty"><?= htmlspecialchars(t('activity.empty_reading')) ?></p>
+                <?php else: ?>
+                    <?php activity_render_book_grid($books_reading); ?>
+                <?php endif; ?>
+            </div>
+        </details>
+
+        <details class="activity-panel activity-panel--want" id="activity-want">
+            <summary>
+                <div class="activity-panel__lead">
+                    <div class="activity-panel__label"><?= htmlspecialchars(t('activity.wishlist')) ?></div>
+                    <div class="activity-panel__count"><?= (int)$n_want ?></div>
+                    <div class="activity-panel__hint"><?= htmlspecialchars(t('activity.expand_hint')) ?></div>
+                </div>
+                <span class="activity-chevron" aria-hidden="true"></span>
+            </summary>
+            <div class="activity-panel__body">
+                <?php if ($n_want === 0): ?>
+                    <p class="activity-empty"><?= htmlspecialchars(t('activity.empty_wishlist')) ?></p>
+                <?php else: ?>
+                    <?php activity_render_book_grid($books_want); ?>
+                <?php endif; ?>
+            </div>
+        </details>
+    </div>
+
+    <section class="activity-genres" aria-labelledby="activity-genres-heading">
+        <h2 id="activity-genres-heading"><?= htmlspecialchars(t('activity.top_genres')) ?></h2>
+        <?php if (empty($fav_categories)): ?>
+            <p class="activity-genres__empty"><?= htmlspecialchars(t('activity.top_genres_empty')) ?></p>
+        <?php else: ?>
+            <div class="activity-genres__list">
+                <?php foreach ($fav_categories as $cat): ?>
+                    <?php
+                    $max = (int)$fav_categories[0]['count'];
+                    $cnt = (int)$cat['count'];
+                    $percent = $max > 0 ? min(100, round(($cnt / $max) * 100)) : 0;
+                    ?>
+                    <div class="activity-genre-row">
+                        <div class="activity-genre-row__head">
+                            <span><?= htmlspecialchars(sskCategoryDisplayName(['name' => $cat['name'], 'name_i18n' => $cat['name_i18n'] ?? null])) ?></span>
+                            <span><?= (int)$cnt ?></span>
+                        </div>
+                        <div class="activity-genre-bar">
+                            <div class="activity-genre-bar__fill" style="width: <?= (int)$percent ?>%;"></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+        <div class="activity-genres__glow" aria-hidden="true"></div>
+    </section>
 </main>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>

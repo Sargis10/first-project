@@ -44,6 +44,19 @@ This file is the persistent working memory for this project and should be update
 - Apache or built-in PHP server
 - MySQL/MariaDB server
 
+## Latest updates (2026-05-09) — `/activity` reading dashboard (expandable lists)
+
+**User request (summary):** The `/activity` page (`library/stats.php`) should show more than aggregate counts: each bucket (finished / reading / wishlist) should expand to a **full book grid** (cover, title, author, category) with polished layout; keep **session-only access** and **CSRF** on book open actions.
+
+**Delivered in repo:**
+- **`library/stats.php`:** After `isLoggedIn()` check, loads three user-scoped lists via `user_books` + `books` + `categories` (`WHERE ub.user_id = ? AND ub.status IN (read|reading|want_to_read)`, ordered by `ub.updated_at DESC`, `books.title ASC`). Renders three `<details class="activity-panel">` sections with counts; empty states use i18n. Book cards POST to `sskUrl('read')` with `csrf_token`, `action=open_book`, `book_id` (same pattern as catalog/library). Top genres block retained (finished books only) with bar visualization classes.
+- **`assets/css/pages/activity.css`:** New page stylesheet (hero, panels, chevron, book grid/cards, dark genres block). Included via `$pageStyles` in `stats.php`.
+- **i18n:** New `activity.*` keys in all six `lang/*.php` files (`title`, `subtitle`, section labels, `expand_hint`, empty strings, top genres heading/empty).
+
+**Deploy:** Push `main` to both GitHub remotes; on Hetzner host, `cd /opt/libery-from-practic && git pull`, then `systemctl restart ssk-app` (or equivalent PHP service using `router.php`).
+
+---
+
 ## Latest updates (2026-05-09) — CSP + NAT-friendly catalog limits + edge deploy hints
 
 **User request:** Address the three “umbrella” gaps: (1) strong browser policy / XSS surface, (2) volumetric abuse beyond app code, (3) corporate NAT sharing one public IP.

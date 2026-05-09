@@ -13,6 +13,18 @@ return [
     'nav.lang.menu_button' => 'Language',
     'nav.contact' => 'Contact',
 
+    'activity.title' => 'Your reading activity',
+    'activity.subtitle' => 'Summary and full lists are visible only to you. Open a section to browse every book.',
+    'activity.completed' => 'Finished',
+    'activity.reading' => 'Reading now',
+    'activity.wishlist' => 'Want to read',
+    'activity.expand_hint' => 'Open to see the full list — click a book to open its page.',
+    'activity.empty_completed' => 'No finished books yet. Open a book and set its status to Read.',
+    'activity.empty_reading' => 'Nothing in progress. Set a book to Reading from its detail page.',
+    'activity.empty_wishlist' => 'Your wishlist is empty. Add books from the catalog.',
+    'activity.top_genres' => 'Top genres (finished)',
+    'activity.top_genres_empty' => 'Mark some books as Read to see your genre mix.',
+
     'admin.categories.title' => 'Manage categories',
     'admin.categories.subtitle' => 'Names in all six UI languages are stored in the database and shown based on the visitor’s language.',
     'admin.categories.add_title' => 'Add category',
