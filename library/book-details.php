@@ -139,11 +139,11 @@ function simpleMarkdown($text) {
             
             <div style="aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; background: #e5e5e5; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;">
                 <?php
-                $detailCover = sskSafePublicCoverPath($book['cover_url'] ?? null);
+                $detailCoverSrc = sskPublicCoverImgSrc($book['cover_url'] ?? null);
                 $detailPh = 'https://placehold.co/400x600/1a1a1a/ffffff?text=' . rawurlencode((string)$book['title']);
                 ?>
-                <?php if ($detailCover !== ''): ?>
-                    <img src="<?= htmlspecialchars($detailCover) ?>" 
+                <?php if ($detailCoverSrc !== ''): ?>
+                    <img src="<?= htmlspecialchars($detailCoverSrc) ?>" 
                          loading="eager"
                          decoding="async"
                          fetchpriority="high"

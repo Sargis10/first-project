@@ -61,11 +61,11 @@ $pageScripts = ['assets/js/pages/index.js'];
                         <button type="submit" class="card-link">
                             <div class="card-image-wrap">
                                 <?php
-                                $cardCover = sskSafePublicCoverPath($book['cover_url'] ?? null);
+                                $cardCoverSrc = sskPublicCoverImgSrc($book['cover_url'] ?? null);
                                 $cardPh = 'https://placehold.co/400x600/1a1a1a/ffffff?text=' . rawurlencode((string)$book['title']);
                                 ?>
-                                <?php if ($cardCover !== ''): ?>
-                                    <img src="<?= htmlspecialchars($cardCover) ?>"
+                                <?php if ($cardCoverSrc !== ''): ?>
+                                    <img src="<?= htmlspecialchars($cardCoverSrc) ?>"
                                          alt="Cover"
                                          loading="<?= $index < 4 ? 'eager' : 'lazy' ?>"
                                          decoding="async"

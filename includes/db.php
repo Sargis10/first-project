@@ -421,10 +421,17 @@ function sskSafePublicCoverPath(?string $path): string {
     if (str_contains($path, '..') || str_contains($path, "\0") || str_contains($path, '\\')) {
         return '';
     }
+    $path = ltrim($path, '/');
     if (!str_starts_with($path, 'uploads/')) {
         return '';
     }
     return $path;
+}
+
+/** Root-relative URL for <img src> (works on /read, /shelf, etc., not only on /). */
+function sskPublicCoverImgSrc(?string $path): string {
+    $safe = sskSafePublicCoverPath($path);
+    return $safe === '' ? '' : '/' . $safe;
 }
 
 // Helper to get current user ID

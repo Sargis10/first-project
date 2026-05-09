@@ -221,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label>Book Cover</label>
                 <div style="aspect-ratio: 2/3; background: #e5e5e5; border-radius: 8px; border: 2px dashed #d6d3d1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; max-width: 200px;">
                     <?php if ($cover_url): ?>
-                        <img id="previewImage" src="<?= htmlspecialchars($cover_url) ?>" style="width:100%; height:100%; object-fit: cover;">
+                        <img id="previewImage" src="<?= htmlspecialchars(sskPublicCoverImgSrc($cover_url)) ?>" style="width:100%; height:100%; object-fit: cover;">
                     <?php else: ?>
                         <img id="previewImage" style="width:100%; height:100%; object-fit: cover; display:none;">
                     <?php endif; ?>

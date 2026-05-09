@@ -96,7 +96,7 @@ foreach ($rows as $book) {
                     <div class="card-image-wrap">
                         ' . (
                             $safeCover !== ''
-                                ? '<img src="' . htmlspecialchars($safeCover) . '"
+                                ? '<img src="' . htmlspecialchars('/' . $safeCover) . '"
                                      alt="Cover"
                                      loading="lazy"
                                      decoding="async"

@@ -153,7 +153,7 @@ function renderBookGrid($books, $emptyMsg) {
         foreach ($books as $b) {
             $myPh = 'https://placehold.co/400x600/1a1a1a/ffffff?text=' . rawurlencode((string)($b['title'] ?? ''));
             $myCover = sskSafePublicCoverPath($b['cover_url'] ?? null);
-            $myImgSrc = $myCover !== '' ? $myCover : $myPh;
+            $myImgSrc = $myCover !== '' ? ('/' . $myCover) : $myPh;
             $myImgPhAttr = $myCover !== '' ? ' data-ssk-placeholder="' . htmlspecialchars($myPh, ENT_QUOTES, 'UTF-8') . '"' : '';
             echo '
             <div class="book-card" style="position: relative;">
