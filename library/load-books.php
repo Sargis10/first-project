@@ -29,14 +29,14 @@ $sql = "
 ";
 $params = [];
 
-if ($category !== '' && strtolower($category) !== 'all') {
-    $sql .= " AND LOWER(COALESCE(categories.slug, '')) = :category";
-    $params[':category'] = strtolower($category);
+if ($category !== '' && sskLower($category) !== 'all') {
+    $sql .= " AND COALESCE(categories.slug, '') = :category";
+    $params[':category'] = sskLower($category);
 }
 
 if ($query !== '') {
-    $sql .= " AND (LOWER(books.title) LIKE :q OR LOWER(books.author) LIKE :q)";
-    $params[':q'] = '%' . strtolower($query) . '%';
+    $sql .= " AND ((books.title COLLATE utf8mb4_unicode_ci) LIKE :q OR (books.author COLLATE utf8mb4_unicode_ci) LIKE :q)";
+    $params[':q'] = '%' . $query . '%';
 }
 
 $sql .= " ORDER BY books.created_at DESC LIMIT :limit OFFSET :offset";

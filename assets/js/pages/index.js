@@ -14,6 +14,7 @@ let currentCategory = 'all';
 let searchDebounce = null;
 /** Avoid wiping SSR book grid on spurious input (browser autofill, extensions) before user focuses search. */
 let searchLiveEnabled = false;
+let userInteractedWithSearch = false;
 
 if (booksGrid) {
     offset = parseInt(booksGrid.dataset.offset || '20', 10);
@@ -94,13 +95,32 @@ async function resetAndReloadBooks() {
 
 if (searchInput) {
     searchInput.addEventListener('focus', () => {
+        userInteractedWithSearch = true;
         searchLiveEnabled = true;
     });
+    searchInput.addEventListener('keydown', () => {
+        userInteractedWithSearch = true;
+        searchLiveEnabled = true;
+    });
+    searchInput.addEventListener('paste', () => {
+        userInteractedWithSearch = true;
+        searchLiveEnabled = true;
+    });
+    searchInput.addEventListener('search', () => {
+        userInteractedWithSearch = true;
+        searchLiveEnabled = true;
+        currentSearch = (searchInput.value || '').trim().toLowerCase();
+        resetAndReloadBooks();
+    });
     searchInput.addEventListener('input', (e) => {
+        const typedValue = (e.target.value || '');
+        if (!searchLiveEnabled && (userInteractedWithSearch || typedValue.length > 0)) {
+            searchLiveEnabled = true;
+        }
         if (!searchLiveEnabled) {
             return;
         }
-        currentSearch = (e.target.value || '').trim().toLowerCase();
+        currentSearch = typedValue.trim().toLowerCase();
         if (searchDebounce) clearTimeout(searchDebounce);
         searchDebounce = setTimeout(() => {
             resetAndReloadBooks();
