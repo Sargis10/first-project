@@ -4,8 +4,9 @@ This file is the persistent working memory for this project and should be update
 
 ## Project Type
 - Stack: PHP + MySQL (no framework)
-- Public entry page: `index.php`
-- Shared DB/bootstrap: `includes/db.php`
+- **Public HTTP entry:** `router.php` (front controller). The built-in server and production PHP process must be started with the router script as the last argument (see `router.php` header comment). Real pages remain as `index.php`, `auth/*.php`, `library/*.php`, `admin/*.php` on disk.
+- User-visible paths are **opaque** (no `.php` in the address bar): `/`, `/sign-in`, `/sign-up`, `/sign-out`, `/about`, `/contact`, `/shelf`, `/activity`, `/read`, `/write`, `/list`, `/manage`, `/manage/topics`, `/manage/content`. Mapping lives in `includes/routes.php` (`sskRoutes()`, `sskUrl()`, `sskPublicPathHandlers()`, `sskLegacyRedirects()`).
+- Shared DB/bootstrap: `includes/db.php` (also loads `includes/routes.php`).
 - UI assets: `CSS/`, `assets/css/pages/`, `assets/js/pages/`, `uploads/`
 - Organized feature routes: `admin/`, `auth/`, `library/`
 
@@ -19,11 +20,9 @@ This file is the persistent working memory for this project and should be update
   - site content settings (`admin/settings.php`)
 
 ## Route Layout
-- `auth/login.php`, `auth/register.php`, `auth/logout.php`
-- `admin/dashboard.php`, `admin/categories.php`, `admin/settings.php`
-- `library/catalog.php`, `library/my-library.php`, `library/book-form.php`, `library/book-details.php`, `library/stats.php`, `library/about.php`
-- `scripts/seed.php`
-- Book detail/edit routes avoid exposing numeric ids in the URL; session keys `ssk_view_book_id` / `ssk_edit_book_id` after CSRF POST handoff.
+- **Filesystem (internal):** `auth/login.php`, `auth/register.php`, `auth/logout.php`; `admin/dashboard.php`, `admin/categories.php`, `admin/settings.php`; `library/catalog.php`, `library/my-library.php`, `library/book-form.php`, `library/book-details.php`, `library/load-books.php`, `library/stats.php`, `library/about.php`, `library/contact.php`; `scripts/seed.php`.
+- **Public URLs:** see `sskRoutes()` in `includes/routes.php`. Legacy `*.php` paths return **301** to the opaque paths; query strings are preserved (e.g. admin category edit `?edit=`).
+- Book detail/edit still avoid numeric ids in the URL; session keys `ssk_view_book_id` / `ssk_edit_book_id` after CSRF POST handoff.
 
 ## Database Map (authoritative)
 - `users`: id, role, email, password, created_at
@@ -44,6 +43,27 @@ This file is the persistent working memory for this project and should be update
 - **Strongly recommended:** `php-mbstring` (UTF-8 helpers). Without it, the app uses ASCII `strtolower` fallbacks for slugs; install on servers: e.g. `apt install php8.3-mbstring`.
 - Apache or built-in PHP server
 - MySQL/MariaDB server
+
+## Latest updates (2026-05-09) — opaque URLs + router
+
+**User request (summary):** Reduce fingerprinting in the browser (avoid visible `login.php`, `book-details.php`, etc.); route everything through short paths; keep defense in depth; sync work to **both** GitHub accounts (`origin` Samvel10, `sargis` Sargis10); deploy to server and verify.
+
+**Delivered in repo:**
+- New `includes/routes.php` and root `router.php` (front controller for `php -S` and equivalent production startup).
+- All internal links, form `action`s, and `header('Location: …')` redirects updated to use `sskUrl(...)` where applicable; catalog infinite scroll fetches `/list` instead of `/library/load-books.php`.
+- `library/load-books.php` JSON fragments: form `action` must use PHP concatenation with `sskUrl('read')` (not `<?=` inside a string).
+- Legacy redirects extended (`/library/index.php`, `/library/catalog.php` → `/`; `auth/index.php`, `admin/index.php` stubs point to opaque targets).
+- `includes/db.php`: `header_remove('X-Powered-By')` inside existing security headers helper (when headers are sent from PHP).
+
+**Git remotes (2026-05-09):** Commit `850dd88` on `main` pushed successfully to `https://github.com/Samvel10/libery-from-practic.git` and `https://github.com/Sargis10/first-project.git`.
+
+**Server deploy (operator action):** This development environment could not SSH into `5.223.92.226` (no authorized key). On the Hetzner host, as the user that owns `/opt/libery-from-practic`:
+1. `cd /opt/libery-from-practic && git pull` (ensure `main` includes `850dd88`).
+2. Update the app unit so PHP uses the router, e.g. `ExecStart=/usr/bin/php -S 127.0.0.1:8090 -t /opt/libery-from-practic /opt/libery-from-practic/router.php` (adjust PHP binary path if needed).
+3. `sudo systemctl daemon-reload` (if unit changed), then `sudo systemctl restart ssk-app`.
+4. Smoke test: `curl -I https://armenianlibery.duckdns.org/sign-in` (200); `curl -I https://armenianlibery.duckdns.org/auth/login.php` (301 to `/sign-in`); logged-in catalog load-more hits `/list`.
+
+---
 
 ## Latest updates (2026-05-09)
 - HTTPS + performance request handled: user asked to secure `armenianlibery.duckdns.org` with TLS and speed up global background image loading.
@@ -91,5 +111,6 @@ This file is the persistent working memory for this project and should be update
 **Correction (2026-05-09):** The catalog did **not** delete books or categories. MySQL still held all rows. The UI broke with **PHP Fatal: `mb_strtolower()` undefined** because `php-mbstring` was not installed on the Hetzner image. Fix: `includes/category_i18n.php` adds `sskLower()` fallback; server should install `php8.3-mbstring` for full Unicode support.
 
 ## Next planned step
-- Keep `main` in sync on both GitHub remotes and redeploy the Hetzner unit after material changes.
+- On the server: `git pull` in `/opt/libery-from-practic`, switch `ssk-app` to start PHP with `router.php`, restart service, verify opaque routes and legacy 301s.
+- Keep `main` in sync on both GitHub remotes after material changes.
 - Keep domain proxy (`armenianlibery.duckdns.org` on `:80`) active and mapped to local app service `127.0.0.1:8090`.
