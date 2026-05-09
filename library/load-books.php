@@ -70,7 +70,7 @@ foreach ($rows as $book) {
              data-title="' . htmlspecialchars($title) . '" 
              data-author="' . htmlspecialchars($author) . '" 
              data-category="' . htmlspecialchars($slug) . '">
-            <form method="POST" action="/library/book-details.php" style="margin: 0;">
+            <form method="POST" action="' . htmlspecialchars(sskUrl('read'), ENT_QUOTES, 'UTF-8') . '" style="margin: 0;">
                 <input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrfToken()) . '">
                 <input type="hidden" name="action" value="open_book">
                 <input type="hidden" name="book_id" value="' . $bookId . '">

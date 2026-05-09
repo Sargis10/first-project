@@ -1,3 +1,3 @@
 <?php
-header('Location: catalog.php');
+header('Location: /');
 exit;

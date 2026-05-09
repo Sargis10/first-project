@@ -147,11 +147,11 @@ $pageStyles = ['assets/css/pages/about.css'];
         <p><?= htmlspecialchars(t('about.cta_text')) ?></p>
         <div class="about-cta-actions">
             <?php if (isLoggedIn()): ?>
-                <a class="btn btn-primary" href="/index.php"><?= htmlspecialchars(t('about.cta_browse')) ?></a>
-                <a class="btn btn-outline" href="/library/my-library.php"><?= htmlspecialchars(t('about.cta_my_library')) ?></a>
+                <a class="btn btn-primary" href="<?= htmlspecialchars(sskUrl('home')) ?>"><?= htmlspecialchars(t('about.cta_browse')) ?></a>
+                <a class="btn btn-outline" href="<?= htmlspecialchars(sskUrl('shelf')) ?>"><?= htmlspecialchars(t('about.cta_my_library')) ?></a>
             <?php else: ?>
-                <a class="btn btn-primary" href="/auth/register.php"><?= htmlspecialchars(t('about.cta_create')) ?></a>
-                <a class="btn btn-outline" href="/auth/login.php"><?= htmlspecialchars(t('about.cta_signin')) ?></a>
+                <a class="btn btn-primary" href="<?= htmlspecialchars(sskUrl('sign_up')) ?>"><?= htmlspecialchars(t('about.cta_create')) ?></a>
+                <a class="btn btn-outline" href="<?= htmlspecialchars(sskUrl('sign_in')) ?>"><?= htmlspecialchars(t('about.cta_signin')) ?></a>
             <?php endif; ?>
         </div>
     </section>

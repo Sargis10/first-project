@@ -67,20 +67,20 @@ $pageStyles = ['assets/css/pages/about.css', 'assets/css/pages/contact.css'];
                 <h4><?= htmlspecialchars(t('contact.topic_catalog_title')) ?></h4>
                 <p><?= htmlspecialchars(t('contact.topic_catalog_text')) ?></p>
                 <?php if (isLoggedIn()): ?>
-                    <a href="/index.php"><?= htmlspecialchars(t('footer.link_catalog')) ?> →</a>
+                    <a href="<?= htmlspecialchars(sskUrl('home')) ?>"><?= htmlspecialchars(t('footer.link_catalog')) ?> →</a>
                 <?php else: ?>
-                    <a href="/auth/login.php"><?= htmlspecialchars(t('footer.link_login')) ?> →</a>
+                    <a href="<?= htmlspecialchars(sskUrl('sign_in')) ?>"><?= htmlspecialchars(t('footer.link_login')) ?> →</a>
                 <?php endif; ?>
             </article>
             <article class="contact-topic">
                 <h4><?= htmlspecialchars(t('contact.topic_account_title')) ?></h4>
                 <p><?= htmlspecialchars(t('contact.topic_account_text')) ?></p>
-                <a href="/auth/login.php"><?= htmlspecialchars(t('contact.topic_account_link')) ?> →</a>
+                <a href="<?= htmlspecialchars(sskUrl('sign_in')) ?>"><?= htmlspecialchars(t('contact.topic_account_link')) ?> →</a>
             </article>
             <article class="contact-topic">
                 <h4><?= htmlspecialchars(t('contact.topic_about_title')) ?></h4>
                 <p><?= htmlspecialchars(t('contact.topic_about_text')) ?></p>
-                <a href="/library/about.php"><?= htmlspecialchars(t('footer.link_about')) ?> →</a>
+                <a href="<?= htmlspecialchars(sskUrl('about')) ?>"><?= htmlspecialchars(t('footer.link_about')) ?> →</a>
             </article>
             <article class="contact-topic">
                 <h4><?= htmlspecialchars(t('contact.topic_trust_title')) ?></h4>
@@ -94,11 +94,11 @@ $pageStyles = ['assets/css/pages/about.css', 'assets/css/pages/contact.css'];
         <p><?= htmlspecialchars(t('contact.cta_title')) ?></p>
         <div class="about-cta-actions">
             <?php if (isLoggedIn()): ?>
-                <a class="btn btn-primary" href="/index.php"><?= htmlspecialchars(t('about.cta_browse')) ?></a>
-                <a class="btn btn-outline" href="/library/about.php"><?= htmlspecialchars(t('footer.link_about')) ?></a>
+                <a class="btn btn-primary" href="<?= htmlspecialchars(sskUrl('home')) ?>"><?= htmlspecialchars(t('about.cta_browse')) ?></a>
+                <a class="btn btn-outline" href="<?= htmlspecialchars(sskUrl('about')) ?>"><?= htmlspecialchars(t('footer.link_about')) ?></a>
             <?php else: ?>
-                <a class="btn btn-primary" href="/auth/register.php"><?= htmlspecialchars(t('about.cta_create')) ?></a>
-                <a class="btn btn-outline" href="/auth/login.php"><?= htmlspecialchars(t('about.cta_signin')) ?></a>
+                <a class="btn btn-primary" href="<?= htmlspecialchars(sskUrl('sign_up')) ?>"><?= htmlspecialchars(t('about.cta_create')) ?></a>
+                <a class="btn btn-outline" href="<?= htmlspecialchars(sskUrl('sign_in')) ?>"><?= htmlspecialchars(t('about.cta_signin')) ?></a>
             <?php endif; ?>
         </div>
     </section>

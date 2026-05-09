@@ -37,7 +37,7 @@ function buildUrl() {
         category: currentCategory,
         q: currentSearch,
     });
-    return `/library/load-books.php?${params.toString()}`;
+    return `/list?${params.toString()}`;
 }
 
 function cacheGet(key) {

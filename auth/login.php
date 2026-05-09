@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../includes/db.php';
 
 if (isLoggedIn()) {
-    header("Location: /index.php");
+    header('Location: ' . sskUrl('home'));
     exit;
 }
 
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 session_regenerate_id(true);
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['role'] = $user['role'] ?? 'user';
-                header("Location: /index.php");
+                header('Location: ' . sskUrl('home'));
                 exit;
             } else {
                 $error = t('auth.invalid_credentials');
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <p style="text-align: center; color: var(--muted-color); font-size: 14px; margin-top: 24px;">
             <?= htmlspecialchars(t('auth.no_account')) ?>
-            <a href="/auth/register.php" style="color: var(--ink-color); font-weight: 600; text-decoration: none;"><?= htmlspecialchars(t('auth.register_here')) ?></a>
+            <a href="<?= htmlspecialchars(sskUrl('sign_up')) ?>" style="color: var(--ink-color); font-weight: 600; text-decoration: none;"><?= htmlspecialchars(t('auth.register_here')) ?></a>
         </p>
     </div>
 </main>

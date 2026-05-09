@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../includes/db.php';
 
 if (!isAdmin()) {
-    header('Location: /index.php');
+    header('Location: ' . sskUrl('home'));
     exit;
 }
 
@@ -143,7 +143,7 @@ $editNames = $editRow ? sskCategoryNamesDecode($editRow['name_i18n'] ?? null) : 
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                 <button type="submit" class="btn btn-primary"><?= htmlspecialchars($editRow ? t('admin.categories.save') : t('admin.categories.add_btn')) ?></button>
                 <?php if ($editRow): ?>
-                    <a href="/admin/categories.php" class="btn btn-outline"><?= htmlspecialchars(t('admin.categories.cancel')) ?></a>
+                    <a href="<?= htmlspecialchars(sskUrl('manage_topics')) ?>" class="btn btn-outline"><?= htmlspecialchars(t('admin.categories.cancel')) ?></a>
                 <?php endif; ?>
             </div>
         </form>
@@ -164,7 +164,7 @@ $editNames = $editRow ? sskCategoryNamesDecode($editRow['name_i18n'] ?? null) : 
                     <td style="padding: 16px 24px; font-weight: 500;"><?= htmlspecialchars(sskCategoryDisplayName($cat)) ?></td>
                     <td style="padding: 16px 24px; color: var(--muted-color); font-family: ui-monospace, monospace; font-size: 13px;"><?= htmlspecialchars($cat['slug'] ?? '') ?></td>
                     <td style="padding: 16px 24px; text-align: right; white-space: nowrap;">
-                        <a href="/admin/categories.php?edit=<?= (int)$cat['id'] ?>" class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px;"><?= htmlspecialchars(t('admin.categories.edit_btn')) ?></a>
+                        <a href="<?= htmlspecialchars(sskUrl('manage_topics', ['edit' => (int)$cat['id']])) ?>" class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px;"><?= htmlspecialchars(t('admin.categories.edit_btn')) ?></a>
                         <form method="POST" style="margin: 0; display: inline;" onsubmit="return confirm('<?= htmlspecialchars(t('admin.categories.delete_confirm')) ?>');">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                             <input type="hidden" name="action" value="delete">

@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../includes/db.php';
 
 if (!isAdmin()) {
-    header("Location: /index.php");
+    header('Location: ' . sskUrl('home'));
     exit;
 }
 
@@ -49,7 +49,7 @@ $settings = $pdo->query("SELECT * FROM site_settings")->fetchAll(PDO::FETCH_KEY_
             <h1 style="font-size: 32px; font-family: var(--font-serif);">Site Settings</h1>
             <p style="color: var(--muted-color);">Configure the information displayed on the About Us page.</p>
         </div>
-        <a href="/library/about.php" class="btn btn-outline" target="_blank">View Live Page →</a>
+        <a href="<?= htmlspecialchars(sskUrl('about')) ?>" class="btn btn-outline" target="_blank">View Live Page →</a>
     </header>
 
     <?php if($success): ?>

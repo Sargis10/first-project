@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../includes/db.php';
 
 if (!isLoggedIn()) {
-    header("Location: /auth/login.php");
+    header('Location: ' . sskUrl('sign_in'));
     exit;
 }
 

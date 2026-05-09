@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../includes/db.php';
 
 if (!isLoggedIn()) {
-    header("Location: /auth/login.php");
+    header('Location: ' . sskUrl('sign_in'));
     exit;
 }
 
@@ -93,7 +93,7 @@ $pageScripts = ['assets/js/pages/user-dashboard.js'];
             <h1 style="font-size: 42px; font-family: var(--font-serif); margin-bottom: 8px;">My Library</h1>
             <p style="color: var(--muted-color); font-size: 18px;">Your personal universe of curated stories.</p>
         </div>
-        <form method="POST" action="/library/book-form.php" style="margin: 0;">
+        <form method="POST" action="<?= htmlspecialchars(sskUrl('write')) ?>" style="margin: 0;">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
             <input type="hidden" name="action" value="prepare_create">
             <button type="submit" class="btn btn-primary" style="padding: 14px 28px; border-radius: 12px; box-shadow: 0 10px 20px -5px rgba(90, 90, 64, 0.3);">
@@ -153,7 +153,7 @@ function renderBookGrid($books, $emptyMsg) {
         foreach ($books as $b) {
             echo '
             <div class="book-card" style="position: relative;">
-                <form method="POST" action="/library/book-details.php" style="margin: 0;">
+                <form method="POST" action="<?= htmlspecialchars(sskUrl('read')) ?>" style="margin: 0;">
                     <input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrfToken()) . '">
                     <input type="hidden" name="action" value="open_book">
                     <input type="hidden" name="book_id" value="' . (int)$b['id'] . '">

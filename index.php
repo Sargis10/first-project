@@ -2,7 +2,7 @@
 require_once 'includes/db.php';
 
 if (!isLoggedIn()) {
-    header("Location: /auth/login.php");
+    header('Location: ' . sskUrl('sign_in'));
     exit;
 }
 
@@ -54,7 +54,7 @@ $pageScripts = ['assets/js/pages/index.js'];
                      data-title="<?= htmlspecialchars(strtolower($book['title'])) ?>" 
                      data-author="<?= htmlspecialchars(strtolower($book['author'])) ?>" 
                      data-category="<?= htmlspecialchars(!empty($book['category_id']) ? sskCategorySlugForFilter(['slug' => $book['category_slug'] ?? '', 'name' => $book['category_name'] ?? '']) : 'uncategorized') ?>">
-                    <form method="POST" action="/library/book-details.php" style="margin: 0;">
+                    <form method="POST" action="<?= htmlspecialchars(sskUrl('read')) ?>" style="margin: 0;">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                         <input type="hidden" name="action" value="open_book">
                         <input type="hidden" name="book_id" value="<?= (int)$book['id'] ?>">
@@ -96,7 +96,7 @@ $pageScripts = ['assets/js/pages/index.js'];
                 <p style="color: var(--muted-color);"><?= htmlspecialchars(t('index.no_books_subtitle')) ?></p>
             </div>
             <?php if (isAdmin()): ?>
-            <form method="POST" action="/library/book-form.php" style="margin-top: 16px; display: inline-block;">
+            <form method="POST" action="<?= htmlspecialchars(sskUrl('write')) ?>" style="margin-top: 16px; display: inline-block;">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                 <input type="hidden" name="action" value="prepare_create">
                 <button type="submit" class="btn btn-primary" style="margin: 0;">

@@ -18,6 +18,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 require_once __DIR__ . '/i18n.php';
 require_once __DIR__ . '/category_i18n.php';
+require_once __DIR__ . '/routes.php';
 sskSetLangFromRequest();
 
 function loadEnvFile($filePath) {
@@ -326,6 +327,9 @@ try {
 function sskSendSecurityHeaders(): void {
     if (headers_sent()) {
         return;
+    }
+    if (function_exists('header_remove')) {
+        header_remove('X-Powered-By');
     }
     header('X-Frame-Options: SAMEORIGIN');
     header('X-Content-Type-Options: nosniff');

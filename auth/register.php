@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../includes/db.php';
 
 if (isLoggedIn()) {
-    header("Location: /index.php");
+    header('Location: ' . sskUrl('home'));
     exit;
 }
 
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     session_regenerate_id(true);
                     $_SESSION['user_id'] = $pdo->lastInsertId();
                     $_SESSION['role'] = 'user';
-                    header("Location: /index.php");
+                    header('Location: ' . sskUrl('home'));
                     exit;
                 } else {
                     $error = t('auth.registration_failed');
@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <p style="text-align: center; color: var(--muted-color); font-size: 14px; margin-top: 24px;">
             <?= htmlspecialchars(t('auth.already_have_account')) ?>
-            <a href="/auth/login.php" style="color: var(--ink-color); font-weight: 600; text-decoration: none;"><?= htmlspecialchars(t('auth.login_here')) ?></a>
+            <a href="<?= htmlspecialchars(sskUrl('sign_in')) ?>" style="color: var(--ink-color); font-weight: 600; text-decoration: none;"><?= htmlspecialchars(t('auth.login_here')) ?></a>
         </p>
     </div>
 </main>

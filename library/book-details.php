@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../includes/db.php';
 
 if (!isLoggedIn()) {
-    header("Location: /auth/login.php");
+    header('Location: ' . sskUrl('sign_in'));
     exit;
 }
 
@@ -12,23 +12,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'open_
     verifyCsrfTokenOrFail();
     $bid = (int)($_POST['book_id'] ?? 0);
     if ($bid <= 0) {
-        header("Location: /index.php");
+        header('Location: ' . sskUrl('home'));
         exit;
     }
     $check = $pdo->prepare("SELECT 1 FROM books WHERE id = ?");
     $check->execute([$bid]);
     if (!$check->fetchColumn()) {
-        header("Location: /index.php");
+        header('Location: ' . sskUrl('home'));
         exit;
     }
     $_SESSION['ssk_view_book_id'] = $bid;
-    header("Location: /library/book-details.php");
+    header('Location: ' . sskUrl('read'));
     exit;
 }
 
 $book_id = $_SESSION['ssk_view_book_id'] ?? null;
 if (!$book_id) {
-    header("Location: /index.php");
+    header('Location: ' . sskUrl('home'));
     exit;
 }
 
@@ -45,7 +45,7 @@ $book = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$book) {
     unset($_SESSION['ssk_view_book_id']);
-    header("Location: /index.php");
+    header('Location: ' . sskUrl('home'));
     exit;
 }
 
@@ -84,11 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
 
         unset($_SESSION['ssk_view_book_id']);
-        header("Location: /index.php");
+        header('Location: ' . sskUrl('home'));
         exit;
     }
 
-    header("Location: /library/book-details.php");
+    header('Location: ' . sskUrl('read'));
     exit;
 }
 
@@ -107,14 +107,14 @@ function simpleMarkdown($text) {
 <main class="container" style="max-width: 1024px; padding: 40px 24px;">
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
-        <a href="/index.php" style="display:inline-flex;align-items:center;gap:8px;color:var(--muted-color);text-decoration:none;font-size:14px;font-weight:500;">
+        <a href="<?= htmlspecialchars(sskUrl('home')) ?>" style="display:inline-flex;align-items:center;gap:8px;color:var(--muted-color);text-decoration:none;font-size:14px;font-weight:500;">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             Back
         </a>
         
         <div style="display: flex; gap: 8px;">
             <?php if (isAdmin() && $book['user_id'] == $user_id): ?>
-            <form method="POST" action="/library/book-form.php" style="margin: 0; display: inline;">
+            <form method="POST" action="<?= htmlspecialchars(sskUrl('write')) ?>" style="margin: 0; display: inline;">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                 <input type="hidden" name="action" value="prepare_edit">
                 <input type="hidden" name="book_id" value="<?= (int)$book['id'] ?>">

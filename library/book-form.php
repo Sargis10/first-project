@@ -2,12 +2,12 @@
 require_once __DIR__ . '/../includes/db.php';
 
 if (!isLoggedIn()) {
-    header("Location: /auth/login.php");
+    header('Location: ' . sskUrl('sign_in'));
     exit;
 }
 
 if (!isAdmin()) {
-    header("Location: /index.php");
+    header('Location: ' . sskUrl('home'));
     exit;
 }
 
@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($routeAction === 'prepare_create') {
         verifyCsrfTokenOrFail();
         unset($_SESSION['ssk_edit_book_id']);
-        header("Location: /library/book-form.php");
+        header('Location: ' . sskUrl('write'));
         exit;
     }
     if ($routeAction === 'prepare_edit') {
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['ssk_edit_book_id'] = $bid;
             }
         }
-        header("Location: /library/book-form.php");
+        header('Location: ' . sskUrl('write'));
         exit;
     }
 }
@@ -67,7 +67,7 @@ if ($book_id) {
 
     if (!$book) {
         unset($_SESSION['ssk_edit_book_id']);
-        header("Location: /library/book-form.php");
+        header('Location: ' . sskUrl('write'));
         exit;
     }
 
@@ -89,7 +89,7 @@ if ($book_id) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verifyCsrfTokenOrFail();
     if (($_POST['action'] ?? '') !== '') {
-        header("Location: /library/book-form.php");
+        header('Location: ' . sskUrl('write'));
         exit;
     }
     $title = trim($_POST['title'] ?? '');
@@ -180,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Note: MySQL may report 0 rows "changed" when values are identical; WHERE still enforced owner id.
             unset($_SESSION['ssk_edit_book_id']);
             $_SESSION['ssk_view_book_id'] = (int)$book_id;
-            header("Location: /library/book-details.php");
+            header('Location: ' . sskUrl('read'));
             exit;
         } else {
             $stmt = $pdo->prepare("INSERT INTO books (user_id, title, author, description, cover_url, category_id, isbn, publisher, publish_year, language, page_count, author_bio, format, edition) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -188,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $newId = (int)$pdo->lastInsertId();
             unset($_SESSION['ssk_edit_book_id']);
             $_SESSION['ssk_view_book_id'] = $newId;
-            header("Location: /library/book-details.php");
+            header('Location: ' . sskUrl('read'));
             exit;
         }
     }

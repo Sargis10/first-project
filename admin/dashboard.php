@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../includes/db.php';
 
 if (!isAdmin()) {
-    header("Location: /index.php");
+    header('Location: ' . sskUrl('home'));
     exit;
 }
 
@@ -101,15 +101,15 @@ $all_users = $pdo->query("
             <p style="color: var(--muted-color); font-size: 16px;">Welcome back, Administrator. Here is your control center.</p>
         </div>
         <div style="display: flex; gap: 12px;">
-            <a href="/admin/categories.php" class="btn btn-outline" style="font-size: 13px; padding: 10px 16px;">
+            <a href="<?= htmlspecialchars(sskUrl('manage_topics')) ?>" class="btn btn-outline" style="font-size: 13px; padding: 10px 16px;">
                 <svg style="margin-right: 8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                 Manage Categories
             </a>
-            <a href="/admin/settings.php" class="btn btn-outline" style="font-size: 13px; padding: 10px 16px;">
+            <a href="<?= htmlspecialchars(sskUrl('manage_content')) ?>" class="btn btn-outline" style="font-size: 13px; padding: 10px 16px;">
                 <svg style="margin-right: 8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                 Site Settings
             </a>
-            <form method="POST" action="/library/book-form.php" style="margin: 0; display: inline;">
+            <form method="POST" action="<?= htmlspecialchars(sskUrl('write')) ?>" style="margin: 0; display: inline;">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                 <input type="hidden" name="action" value="prepare_create">
                 <button type="submit" class="btn btn-primary" style="font-size: 13px; padding: 10px 16px;">
@@ -281,7 +281,7 @@ $all_users = $pdo->query("
         <section>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                 <h2 style="font-size: 24px;">Recent Books</h2>
-                <a href="/index.php" style="color: var(--ink-color); font-size: 14px; font-weight: 500; text-decoration: none;">View All &rarr;</a>
+                <a href="<?= htmlspecialchars(sskUrl('home')) ?>" style="color: var(--ink-color); font-size: 14px; font-weight: 500; text-decoration: none;">View All &rarr;</a>
             </div>
             
             <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); overflow-x: auto;">
@@ -305,13 +305,13 @@ $all_users = $pdo->query("
                             <td style="padding: 16px 24px; color: var(--muted-color);"><?= date('M j, Y', strtotime($b['created_at'])) ?></td>
                             <td style="padding: 16px 24px; text-align: right;">
                                 <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                                    <form method="POST" action="/library/book-form.php" style="margin: 0;">
+                                    <form method="POST" action="<?= htmlspecialchars(sskUrl('write')) ?>" style="margin: 0;">
                                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                                         <input type="hidden" name="action" value="prepare_edit">
                                         <input type="hidden" name="book_id" value="<?= (int)$b['id'] ?>">
                                         <button type="submit" class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;">Edit</button>
                                     </form>
-                                    <form method="POST" action="/library/book-details.php" style="margin: 0;">
+                                    <form method="POST" action="<?= htmlspecialchars(sskUrl('read')) ?>" style="margin: 0;">
                                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                                         <input type="hidden" name="action" value="open_book">
                                         <input type="hidden" name="book_id" value="<?= (int)$b['id'] ?>">

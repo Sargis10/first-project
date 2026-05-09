@@ -5,31 +5,31 @@ $footerAdmin = $footerLoggedIn && function_exists('isAdmin') && isAdmin();
     <footer class="site-footer">
         <div class="container site-footer__main">
             <div class="site-footer__brand">
-                <a href="/index.php" class="site-footer__logo">Libris</a>
+                <a href="<?= htmlspecialchars(sskUrl('home')) ?>" class="site-footer__logo">Libris</a>
                 <p class="site-footer__tagline"><?= htmlspecialchars(t('footer.tagline')) ?></p>
                 <p class="site-footer__made"><?= htmlspecialchars(t('footer.made_with')) ?></p>
             </div>
             <div class="site-footer__col">
                 <h4 class="site-footer__heading"><?= htmlspecialchars(t('footer.col_explore')) ?></h4>
                 <ul class="site-footer__links">
-                    <li><a href="/index.php"><?= htmlspecialchars(t('footer.link_catalog')) ?></a></li>
-                    <li><a href="/library/about.php"><?= htmlspecialchars(t('footer.link_about')) ?></a></li>
-                    <li><a href="/library/contact.php"><?= htmlspecialchars(t('footer.link_contact')) ?></a></li>
+                    <li><a href="<?= htmlspecialchars(sskUrl('home')) ?>"><?= htmlspecialchars(t('footer.link_catalog')) ?></a></li>
+                    <li><a href="<?= htmlspecialchars(sskUrl('about')) ?>"><?= htmlspecialchars(t('footer.link_about')) ?></a></li>
+                    <li><a href="<?= htmlspecialchars(sskUrl('contact')) ?>"><?= htmlspecialchars(t('footer.link_contact')) ?></a></li>
                 </ul>
             </div>
             <div class="site-footer__col">
                 <h4 class="site-footer__heading"><?= htmlspecialchars(t('footer.col_product')) ?></h4>
                 <ul class="site-footer__links">
                     <?php if ($footerLoggedIn): ?>
-                        <li><a href="/library/my-library.php"><?= htmlspecialchars(t('nav.my_library')) ?></a></li>
-                        <li><a href="/library/stats.php"><?= htmlspecialchars(t('footer.link_stats')) ?></a></li>
+                        <li><a href="<?= htmlspecialchars(sskUrl('shelf')) ?>"><?= htmlspecialchars(t('nav.my_library')) ?></a></li>
+                        <li><a href="<?= htmlspecialchars(sskUrl('activity')) ?>"><?= htmlspecialchars(t('footer.link_stats')) ?></a></li>
                         <?php if ($footerAdmin): ?>
-                            <li><a href="/admin/dashboard.php"><?= htmlspecialchars(t('nav.dashboard')) ?></a></li>
-                            <li><a href="/library/book-form.php"><?= htmlspecialchars(t('nav.add_book')) ?></a></li>
+                            <li><a href="<?= htmlspecialchars(sskUrl('manage')) ?>"><?= htmlspecialchars(t('nav.dashboard')) ?></a></li>
+                            <li><a href="<?= htmlspecialchars(sskUrl('write')) ?>"><?= htmlspecialchars(t('nav.add_book')) ?></a></li>
                         <?php endif; ?>
                     <?php else: ?>
-                        <li><a href="/auth/login.php"><?= htmlspecialchars(t('footer.link_login')) ?></a></li>
-                        <li><a href="/auth/register.php"><?= htmlspecialchars(t('footer.link_register')) ?></a></li>
+                        <li><a href="<?= htmlspecialchars(sskUrl('sign_in')) ?>"><?= htmlspecialchars(t('footer.link_login')) ?></a></li>
+                        <li><a href="<?= htmlspecialchars(sskUrl('sign_up')) ?>"><?= htmlspecialchars(t('footer.link_register')) ?></a></li>
                     <?php endif; ?>
                 </ul>
             </div>
