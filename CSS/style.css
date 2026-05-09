@@ -57,7 +57,7 @@ body {
     background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
     background-size: auto, auto, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, cover;
     background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, center bottom;
-    background-attachment: scroll, scroll, scroll, scroll, scroll, scroll, scroll, fixed;
+    background-attachment: scroll, scroll, scroll, scroll, scroll, scroll, scroll, scroll;
 }
 
 @media (max-width: 768px) {

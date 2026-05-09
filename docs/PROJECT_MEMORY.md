@@ -46,6 +46,10 @@ This file is the persistent working memory for this project and should be update
 - MySQL/MariaDB server
 
 ## Latest updates (2026-05-09)
+- HTTPS + performance request handled: user asked to secure `armenianlibery.duckdns.org` with TLS and speed up global background image loading.
+- Root cause identified for slow background paint: static image responses had no explicit cache headers from proxied app (`library-reading-room-bg.webp` served without `Cache-Control`), causing repeat fetch/decode; desktop `background-attachment: fixed` also increased repaint cost.
+- Mitigation applied in app code: `includes/header.php` now preloads the background image; `CSS/style.css` uses `scroll` attachment on desktop too to reduce jank.
+- Proxy-aware HTTPS detection added in `includes/db.php` (`HTTP_X_FORWARDED_PROTO`) so session cookies stay `Secure` when TLS is terminated by Apache reverse proxy.
 - Domain activation request processed: user connected `armenianlibery.duckdns.org` -> `5.223.92.226` and requested full activation without `:8090`.
 - Delivery plan recorded and executed order: (1) update local memory/docs, (2) configure server reverse proxy on port `80`, (3) keep both GitHub remotes (`origin`, `sargis`) in sync, (4) redeploy/verify service.
 - Category i18n backfill CLI: `scripts/backfill-category-translations.php` writes six-language JSON for known genre slugs; docs updated (`README.md`, `database/tables.txt`, `database_schema.sql` column comment).
